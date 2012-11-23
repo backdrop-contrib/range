@@ -2,3 +2,4 @@ name = Range field
 description = Provides numeric range field.
 package = Fields
 core = 7.x
+dependencies[] = field
