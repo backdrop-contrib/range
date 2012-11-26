@@ -10,21 +10,21 @@
  */
 function range_field_schema($field) {
   switch ($field['type']) {
-    case 'range_integer' :
+    case 'range_integer':
       $column = array(
         'type' => 'int',
         'not null' => FALSE,
       );
       break;
 
-    case 'range_float' :
+    case 'range_float':
       $column = array(
         'type' => 'float',
         'not null' => FALSE,
       );
       break;
 
-    case 'range_decimal' :
+    case 'range_decimal':
       $column = array(
         'type' => 'numeric',
         'precision' => $field['settings']['precision'],

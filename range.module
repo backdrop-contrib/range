@@ -354,7 +354,7 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     $to = strtr($to, '.', $field['settings']['decimal_separator']);
   }
 
-  // Wrap in a fieldset for single fields
+  // Wrap in a fieldset for single field.
   if ($field['cardinality'] == 1) {
     $element['#type'] = 'fieldset';
   }
@@ -468,4 +468,3 @@ function range_field_widget_validate_subelement($subelement, $element, &$form_st
 function range_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element, $error['message']);
 }
-
