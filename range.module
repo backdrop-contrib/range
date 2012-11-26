@@ -406,20 +406,23 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 }
 
 /**
- * FAPI validation of an individual number element.
+ * FAPI validation of an individual range element.
  */
 function range_field_widget_validate($element, &$form_state) {
-  range_field_widget_validate_value('from', $element, $form_state);
-  range_field_widget_validate_value('to', $element, $form_state);
+  range_field_widget_validate_subelement('from', $element, $form_state);
+  range_field_widget_validate_subelement('to', $element, $form_state);
 }
 
-function range_field_widget_validate_value($field_name, $element, &$form_state) {
+/**
+ * FAPI validation of a FROM or TO range subelement.
+ */
+function range_field_widget_validate_subelement($subelement, $element, &$form_state) {
   $field = field_widget_field($element, $form_state);
   $instance = field_widget_instance($element, $form_state);
 
   $type = $element['#range_type'];
 
-  $element = $element[$field_name];
+  $element = $element[$subelement];
   $value = $element['#value'];
   // Reject invalid characters.
   if (!empty($value)) {
