@@ -400,7 +400,7 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $element['#element_validate'][] = 'range_field_widget_validate';
 
-  $element['#attached']['css'][] = drupal_get_path('module', 'range') . '/css/range_admin.css';
+  $element['#attached']['css'][] = drupal_get_path('module', 'range') . '/css/range.admin.css';
 
   return $element;
 }
