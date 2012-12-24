@@ -9,27 +9,39 @@
  * Implements hook_field_info().
  */
 function range_field_info() {
+  $instance_settings = array(
+    'min' => '',
+    'max' => '',
+    'prefix' => '',
+    'suffix' => ''
+  );
   return array(
     'range_integer' => array(
       'label' => t('Integer range'),
       'description' => t('This field stores a range in the database as an integer.'),
-      'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
+      'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_integer',
     ),
     'range_decimal' => array(
       'label' => t('Decimal range'),
       'description' => t('This field stores a range in the database in a fixed decimal format.'),
-      'settings' => array('precision' => 10, 'scale' => 2, 'decimal_separator' => '.'),
-      'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
+      'settings' => array(
+        'precision' => 10,
+        'scale' => 2,
+        'decimal_separator' => '.'
+      ),
+      'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_decimal',
     ),
     'range_float' => array(
       'label' => t('Float range'),
       'description' => t('This field stores a range in the database in a floating point format.'),
-      'settings' => array('decimal_separator' => '.'),
-      'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
+      'settings' => array(
+        'decimal_separator' => '.'
+      ),
+      'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_decimal',
     ),
@@ -175,7 +187,7 @@ function range_field_presave($entity_type, $entity, $field, $instance, $langcode
  */
 function range_field_is_empty($item, $field) {
   if (empty($item['from']) && (string) $item['from'] !== '0'
-   && empty($item['to']) && (string) $item['to'] !== '0') {
+          && empty($item['to']) && (string) $item['to'] !== '0') {
     return TRUE;
   }
   return FALSE;
@@ -287,7 +299,7 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
   $summary = array();
   if ($display['type'] == 'range_decimal' || $display['type'] == 'range_integer') {
     $from = number_format(1234.1234567890, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
-    $to   = number_format(4321.0987654321, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
+    $to = number_format(4321.0987654321, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
     $summary[] = $from . $settings['range_separator'] . $to;
     if ($settings['prefix_suffix']) {
       $summary[] = t('Display with prefix and suffix.');
@@ -378,24 +390,24 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#title' => t('From'),
     '#default_value' => $from,
     '#prefix' => '<div class="field-values-wrapper clearfix">',
-  ) + $base;
+          ) + $base;
 
   $element['to'] = array(
     '#title' => t('to'),
     '#default_value' => $to,
     '#suffix' => '</div>',
-  ) + $base;
+          ) + $base;
 
   // Add prefix and suffix.
   if (!empty($instance['settings']['prefix'])) {
     $prefix = field_filter_xss($instance['settings']['prefix']);
     $element['from']['#field_prefix'] = $prefix;
-    $element['to']['#field_prefix']   = $prefix;
+    $element['to']['#field_prefix'] = $prefix;
   }
   if (!empty($instance['settings']['suffix'])) {
     $suffix = field_filter_xss($instance['settings']['suffix']);
     $element['from']['#field_suffix'] = $suffix;
-    $element['to']['#field_suffix']   = $suffix;
+    $element['to']['#field_suffix'] = $suffix;
   }
 
   $element['#element_validate'][] = 'range_field_widget_validate';
