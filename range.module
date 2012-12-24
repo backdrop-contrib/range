@@ -13,7 +13,7 @@ function range_field_info() {
     'min' => '',
     'max' => '',
     'prefix' => '',
-    'suffix' => ''
+    'suffix' => '',
   );
   return array(
     'range_integer' => array(
@@ -29,7 +29,7 @@ function range_field_info() {
       'settings' => array(
         'precision' => 10,
         'scale' => 2,
-        'decimal_separator' => '.'
+        'decimal_separator' => '.',
       ),
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
@@ -39,7 +39,7 @@ function range_field_info() {
       'label' => t('Float range'),
       'description' => t('This field stores a range in the database in a floating point format.'),
       'settings' => array(
-        'decimal_separator' => '.'
+        'decimal_separator' => '.',
       ),
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
@@ -390,13 +390,13 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#title' => t('From'),
     '#default_value' => $from,
     '#prefix' => '<div class="field-values-wrapper clearfix">',
-          ) + $base;
+  ) + $base;
 
   $element['to'] = array(
     '#title' => t('to'),
     '#default_value' => $to,
     '#suffix' => '</div>',
-          ) + $base;
+  ) + $base;
 
   // Add prefix and suffix.
   if (!empty($instance['settings']['prefix'])) {
