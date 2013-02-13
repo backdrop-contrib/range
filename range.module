@@ -22,6 +22,8 @@ function range_field_info() {
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_integer',
+      'property_type' => 'field_item_range',
+      'property_callbacks' => array('range_metadata_field_range_callback'),
     ),
     'range_decimal' => array(
       'label' => t('Decimal range'),
@@ -34,6 +36,8 @@ function range_field_info() {
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_decimal',
+      'property_type' => 'field_item_range',
+      'property_callbacks' => array('range_metadata_field_range_callback'),
     ),
     'range_float' => array(
       'label' => t('Float range'),
@@ -44,6 +48,8 @@ function range_field_info() {
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
       'default_formatter' => 'range_decimal',
+      'property_type' => 'field_item_range',
+      'property_callbacks' => array('range_metadata_field_range_callback'),
     ),
   );
 }
@@ -479,4 +485,50 @@ function range_field_widget_validate_subelement($subelement, $element, &$form_st
  */
 function range_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element, $error['message']);
+}
+
+/**
+ * Defines properties for range field.
+ *
+ * @see entity_metadata_field_entity_property_info()
+ */
+function range_metadata_field_range_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+  // Define a data structure so it's possible to deal with files and their
+  // descriptions.
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+
+  // Auto-create the field $items as soon as a property is set.
+  $property['auto creation'] = 'entity_property_create_array';
+
+  $property['property info'] = range_property_field_item_range_info($field);
+
+  unset($property['query callback']);
+}
+
+/**
+ * Defines info for the properties of the range field data structure.
+ */
+function range_property_field_item_range_info($field) {
+  $type = $field['type'] == 'range_integer' ? 'int' : 'decimal';
+//  $type = $field['cardinality'] != 1 ? "list<$type>" : $type;
+
+  $properties['from'] = array(
+    'type' => $type,
+    'label' => t('From value'),
+    'sanitized' => TRUE,
+    'getter callback' => 'entity_property_verbatim_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'required' => TRUE,
+  );
+  $properties['to'] = array(
+    'type' => $type,
+    'label' => t('To value'),
+    'sanitized' => TRUE,
+    'getter callback' => 'entity_property_verbatim_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'required' => TRUE,
+  );
+  return $properties;
 }
