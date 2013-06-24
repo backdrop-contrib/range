@@ -3,3 +3,5 @@ description = Provides numeric range field.
 package = Fields
 core = 7.x
 dependencies[] = field
+
+files[] = views/range_views_handler_filter_range.inc

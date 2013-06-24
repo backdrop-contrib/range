@@ -549,3 +549,13 @@ function range_property_field_item_range_info($field) {
   );
   return $properties;
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function range_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'range') . '/views',
+  );
+}
