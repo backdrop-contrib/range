@@ -211,6 +211,7 @@ function range_field_formatter_info() {
       'label' => t('Default'),
       'field types' => array('range_integer'),
       'settings' => array(
+        'range_combine' => FALSE,
         'range_separator' => '-',
         'thousand_separator' => ' ',
         // The 'decimal_separator' and 'scale' settings are not configurable
@@ -226,6 +227,7 @@ function range_field_formatter_info() {
       'label' => t('Default'),
       'field types' => array('range_decimal', 'range_float'),
       'settings' => array(
+        'range_combine' => FALSE,
         'range_separator' => '-',
         'thousand_separator' => ' ',
         'decimal_separator' => '.',
@@ -237,6 +239,7 @@ function range_field_formatter_info() {
       'label' => t('Unformatted'),
       'field types' => array('range_integer', 'range_decimal', 'range_float'),
       'settings' => array(
+        'range_combine' => FALSE,
         'range_separator' => '-',
       ),
     ),
@@ -250,6 +253,12 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
+  $element['range_combine'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Combine equivalent values'),
+    '#description' => t('If the FROM and TO values are equal, combine the display into a single value.'),
+    '#default_value' => $settings['range_combine'],
+  );
   $element['range_separator'] = array(
     '#type' => 'textfield',
     '#title' => t('Range separator.'),
@@ -307,6 +316,9 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
     $from = number_format(1234.1234567890, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
     $to = number_format(4321.0987654321, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
     $summary[] = $from . $settings['range_separator'] . $to;
+    if ($settings['range_combine']) {
+      $summary[] = t('Equivalent values will be combined into a single value.');
+    }
     if ($settings['prefix_suffix']) {
       $summary[] = t('Display with prefix and suffix.');
     }
@@ -328,7 +340,13 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
       foreach ($items as $delta => $item) {
         $from = number_format($item['from'], $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
         $to = number_format($item['to'], $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
-        $output = $from . $settings['range_separator'] . $to;
+
+        // Combine values if they are equal.
+        $output = $from;
+        if (!$settings['range_combine'] || ($settings['range_combine'] && $from !== $to)) {
+          $output .= $settings['range_separator'] . $to;
+        }
+
         if ($settings['prefix_suffix']) {
           $prefix = isset($instance['settings']['prefix']) ? field_filter_xss($instance['settings']['prefix']) : '';
           $suffix = isset($instance['settings']['suffix']) ? field_filter_xss($instance['settings']['suffix']) : '';
