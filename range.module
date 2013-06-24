@@ -253,12 +253,6 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $element['range_combine'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Combine equivalent values'),
-    '#description' => t('If the FROM and TO values are equal, combine the display into a single value.'),
-    '#default_value' => $settings['range_combine'],
-  );
   $element['range_separator'] = array(
     '#type' => 'textfield',
     '#title' => t('Range separator.'),
@@ -293,7 +287,12 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
         '#description' => t('The number of digits to the right of the decimal.'),
       );
     }
-
+    $element['range_combine'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Combine equivalent values'),
+      '#description' => t('If the FROM and TO values are equal, combine the display into a single value.'),
+      '#default_value' => $settings['range_combine'],
+    );
     $element['prefix_suffix'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display prefix and suffix.'),
