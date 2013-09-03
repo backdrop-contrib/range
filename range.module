@@ -12,8 +12,14 @@ function range_field_info() {
   $instance_settings = array(
     'min' => '',
     'max' => '',
-    'prefix' => '',
-    'suffix' => '',
+    'from' => array(
+      'prefix' => '',
+      'suffix' => '',
+    ),
+    'to' => array(
+      'prefix' => '',
+      'suffix' => '',
+    ),
   );
   return array(
     'range_integer' => array(
@@ -112,22 +118,45 @@ function range_field_instance_settings_form($field, $instance) {
     '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
     '#element_validate' => array('element_validate_number'),
   );
-  $form['prefix'] = array(
+
+  _range_field_instance_settings_form_prefix_suffix($form, t('FROM'), 'from', $settings);
+  _range_field_instance_settings_form_prefix_suffix($form, t('TO'), 'to', $settings);
+
+  return $form;
+}
+
+/**
+ * Helper function. Builds settings fieldsets for the FROM/TO values.
+ *
+ * @param array $form
+ *  Instance settings form definition array.
+ * @param string $title
+ *  Fieldset title.
+ * @param string $name
+ *  Form element machine name.
+ * @param array $settings
+ *  Field instance settings.
+ */
+function _range_field_instance_settings_form_prefix_suffix(&$form, $title, $name, $settings) {
+  $form[$name] = array(
+    '#type' => 'fieldset',
+    '#title' => $title,
+  );
+
+  $form[$name]['prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('Prefix'),
-    '#default_value' => $settings['prefix'],
+    '#default_value' => $settings[$name]['prefix'],
     '#size' => 60,
     '#description' => t("Define a string that should be prefixed to the value, like '$ ' or '&euro; '. Leave blank for none."),
   );
-  $form['suffix'] = array(
+  $form[$name]['suffix'] = array(
     '#type' => 'textfield',
     '#title' => t('Suffix'),
-    '#default_value' => $settings['suffix'],
+    '#default_value' => $settings[$name]['suffix'],
     '#size' => 60,
     '#description' => t("Define a string that should be suffixed to the value, like ' m', ' kb/s'. Leave blank for none."),
   );
-
-  return $form;
 }
 
 /**
@@ -192,8 +221,7 @@ function range_field_presave($entity_type, $entity, $field, $instance, $langcode
  * Implements hook_field_is_empty().
  */
 function range_field_is_empty($item, $field) {
-  if (empty($item['from']) && (string) $item['from'] !== '0'
-          && empty($item['to']) && (string) $item['to'] !== '0') {
+  if (empty($item['from']) && (string) $item['from'] !== '0' && empty($item['to']) && (string) $item['to'] !== '0') {
     return TRUE;
   }
   return FALSE;
@@ -220,7 +248,8 @@ function range_field_formatter_info() {
         // formatters can use the same code.
         'decimal_separator' => '.',
         'scale' => 0,
-        'prefix_suffix' => TRUE,
+        'from_prefix_suffix' => TRUE,
+        'to_prefix_suffix' => TRUE,
       ),
     ),
     'range_decimal' => array(
@@ -232,7 +261,8 @@ function range_field_formatter_info() {
         'thousand_separator' => ' ',
         'decimal_separator' => '.',
         'scale' => 2,
-        'prefix_suffix' => TRUE,
+        'from_prefix_suffix' => TRUE,
+        'to_prefix_suffix' => TRUE,
       ),
     ),
     'range_unformatted' => array(
@@ -293,10 +323,15 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#description' => t('If the FROM and TO values are equal, combine the display into a single value.'),
       '#default_value' => $settings['range_combine'],
     );
-    $element['prefix_suffix'] = array(
+    $element['from_prefix_suffix'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display prefix and suffix.'),
-      '#default_value' => $settings['prefix_suffix'],
+      '#title' => t('Display <em>FROM value</em> prefix and suffix.'),
+      '#default_value' => $settings['from_prefix_suffix'],
+    );
+    $element['to_prefix_suffix'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display <em>TO value</em> prefix and suffix.'),
+      '#default_value' => $settings['to_prefix_suffix'],
     );
   }
 
@@ -318,8 +353,11 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
     if ($settings['range_combine']) {
       $summary[] = t('Equivalent values will be combined into a single value.');
     }
-    if ($settings['prefix_suffix']) {
-      $summary[] = t('Display with prefix and suffix.');
+    if ($settings['from_prefix_suffix']) {
+      $summary[] = t('Display with <em>FROM value</em> prefix and suffix.');
+    }
+    if ($settings['to_prefix_suffix']) {
+      $summary[] = t('Display with <em>TO value</em> prefix and suffix.');
     }
   }
 
@@ -346,11 +384,10 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
           $output .= $settings['range_separator'] . $to;
         }
 
-        if ($settings['prefix_suffix']) {
-          $prefix = isset($instance['settings']['prefix']) ? field_filter_xss($instance['settings']['prefix']) : '';
-          $suffix = isset($instance['settings']['suffix']) ? field_filter_xss($instance['settings']['suffix']) : '';
-          $output = $prefix . $output . $suffix;
-        }
+        $from = _range_field_formatter_view_prefix_suffix($from, $settings['from_prefix_suffix'], $instance['settings']['from']);
+        $to = _range_field_formatter_view_prefix_suffix($to, $settings['to_prefix_suffix'], $instance['settings']['to']);
+
+        $output = $from . $settings['range_separator'] . $to;
         $element[$delta] = array('#markup' => $output);
       }
       break;
@@ -363,6 +400,28 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * Helper function. Adds prefix and suffix to the given range field value.
+ *
+ * @param string $value
+ *  FROM/TO range field value.
+ * @param boolean $display_prefix
+ *  Whether to add suffix/prefix or not.
+ * @param array $settings
+ *  Field instance FROM/TO value settings.
+ * @return string
+ *  Range field value with added prefix/suffix.
+ */
+function _range_field_formatter_view_prefix_suffix($value, $display_prefix, $settings) {
+  if ($display_prefix) {
+    $prefix = isset($settings['prefix']) ? field_filter_xss($settings['prefix']) : '';
+    $suffix = isset($settings['suffix']) ? field_filter_xss($settings['suffix']) : '';
+    return $prefix . $value . $suffix;
+  }
+
+  return $value;
 }
 
 /**
@@ -413,31 +472,45 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#title' => t('From'),
     '#default_value' => $from,
     '#prefix' => '<div class="field-values-wrapper clearfix">',
-  ) + $base;
+          ) + $base;
 
   $element['to'] = array(
     '#title' => t('to'),
     '#default_value' => $to,
     '#suffix' => '</div>',
-  ) + $base;
+          ) + $base;
 
-  // Add prefix and suffix.
-  if (!empty($instance['settings']['prefix'])) {
-    $prefix = field_filter_xss($instance['settings']['prefix']);
-    $element['from']['#field_prefix'] = $prefix;
-    $element['to']['#field_prefix'] = $prefix;
-  }
-  if (!empty($instance['settings']['suffix'])) {
-    $suffix = field_filter_xss($instance['settings']['suffix']);
-    $element['from']['#field_suffix'] = $suffix;
-    $element['to']['#field_suffix'] = $suffix;
-  }
+  // Add prefixes and suffixes.
+  _range_field_widget_form_subelement_prefix_suffix($element, 'from', $instance['settings']);
+  _range_field_widget_form_subelement_prefix_suffix($element, 'to', $instance['settings']);
 
   $element['#element_validate'][] = 'range_field_widget_validate';
 
   $element['#attached']['css'][] = drupal_get_path('module', 'range') . '/css/range.admin.css';
 
   return $element;
+}
+
+/**
+ * Helper function. Adds prefix and suffix to a range field widget FROM/TO
+ * subelements.
+ *
+ * @param array $element
+ *  Range field widget definition array.
+ * @param string $name
+ *  Form element machine name.
+ * @param array $settings
+ *  Field instance settings.
+ */
+function _range_field_widget_form_subelement_prefix_suffix(&$element, $name, $settings) {
+  if (!empty($settings[$name]['prefix'])) {
+    $prefix = field_filter_xss($settings[$name]['prefix']);
+    $element[$name]['#field_prefix'] = $prefix;
+  }
+  if (!empty($settings[$name]['suffix'])) {
+    $suffix = field_filter_xss($settings[$name]['suffix']);
+    $element[$name]['#field_suffix'] = $suffix;
+  }
 }
 
 /**
