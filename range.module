@@ -669,8 +669,7 @@ function range_metadata_field_range_callback(&$info, $entity_type, $field, $inst
  * Defines info for the properties of the range field data structure.
  */
 function range_property_field_item_range_info($field) {
-  $type = $field['type'] == 'range_integer' ? 'int' : 'decimal';
-//  $type = $field['cardinality'] != 1 ? "list<$type>" : $type;
+  $type = $field['type'] == 'range_integer' ? 'integer' : 'decimal';
 
   $properties['from'] = array(
     'type' => $type,
