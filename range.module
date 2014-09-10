@@ -13,10 +13,12 @@ function range_field_info() {
     'min' => '',
     'max' => '',
     'from' => array(
+      'label' => t('From'),
       'prefix' => '',
       'suffix' => '',
     ),
     'to' => array(
+      'label' => t('to'),
       'prefix' => '',
       'suffix' => '',
     ),
@@ -119,30 +121,34 @@ function range_field_instance_settings_form($field, $instance) {
     '#element_validate' => array('element_validate_number'),
   );
 
-  _range_field_instance_settings_form_prefix_suffix($form, t('FROM'), 'from', $settings);
-  _range_field_instance_settings_form_prefix_suffix($form, t('TO'), 'to', $settings);
+  _range_field_instance_subelements_settings_form($form, 'from', $settings);
+  _range_field_instance_subelements_settings_form($form, 'to', $settings);
 
   return $form;
 }
 
 /**
- * Helper function. Builds settings fieldsets for the FROM/TO values.
+ * Helper function. Builds settings fieldsets for the FROM/TO subelements.
  *
  * @param array $form
  *  Instance settings form definition array.
- * @param string $title
- *  Fieldset title.
  * @param string $name
  *  Form element machine name.
  * @param array $settings
  *  Field instance settings.
  */
-function _range_field_instance_settings_form_prefix_suffix(&$form, $title, $name, $settings) {
+function _range_field_instance_subelements_settings_form(&$form, $name, $settings) {
   $form[$name] = array(
     '#type' => 'fieldset',
-    '#title' => $title,
+    '#title' => $settings[$name]['label'],
   );
 
+  $form[$name]['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Form element label'),
+    '#default_value' => $settings[$name]['label'],
+    '#description' => t('Defines label for form element.'),
+  );
   $form[$name]['prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('Prefix'),
@@ -508,6 +514,7 @@ function range_field_widget_info() {
  * Implements hook_field_widget_form().
  */
 function range_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $settings = $instance['settings'];
   $from = isset($items[$delta]['from']) ? $items[$delta]['from'] : '';
   $to = isset($items[$delta]['to']) ? $items[$delta]['to'] : '';
   // Substitute the decimal separator.
@@ -537,16 +544,16 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   );
 
   $element['from'] = array(
-    '#title' => t('From'),
+    '#title' => $settings['from']['label'],
     '#default_value' => $from,
     '#prefix' => '<div class="field-values-wrapper clearfix">',
-          ) + $base;
+      ) + $base;
 
   $element['to'] = array(
-    '#title' => t('to'),
+    '#title' => $settings['to']['label'],
     '#default_value' => $to,
     '#suffix' => '</div>',
-          ) + $base;
+      ) + $base;
 
   // Add prefixes and suffixes.
   _range_field_widget_form_subelement_prefix_suffix($element, 'from', $instance['settings']);
@@ -624,7 +631,7 @@ function range_field_widget_validate_subelement($subelement, $element, &$form_st
           $message = t('%field: There should only be one decimal separator (@separator).', array(
             '%field' => t($instance['label']),
             '@separator' => $field['settings']['decimal_separator'],
-                  )
+              )
           );
           form_error($element, $message);
         }
