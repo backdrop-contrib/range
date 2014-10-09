@@ -12,6 +12,10 @@ function range_field_info() {
   $instance_settings = array(
     'min' => '',
     'max' => '',
+    'field' => array(
+      'prefix' => '',
+      'suffix' => '',
+    ),
     'from' => array(
       'label' => t('From'),
       'prefix' => '',
@@ -120,6 +124,18 @@ function range_field_instance_settings_form($field, $instance) {
     '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
     '#element_validate' => array('element_validate_number'),
   );
+  $form['field']['prefix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Field prefix'),
+    '#default_value' => $settings['field']['prefix'],
+    '#description' => t("Define a string that should be prefixed to the field value, like '$ ' or '&euro; '. Leave blank for none."),
+  );
+  $form['field']['suffix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Field suffix'),
+    '#default_value' => $settings['field']['suffix'],
+    '#description' => t("Define a string that should be suffixed to the field value, like ' m', ' kb/s'. Leave blank for none."),
+  );
 
   _range_field_instance_subelements_settings_form($form, 'from', $settings);
   _range_field_instance_subelements_settings_form($form, 'to', $settings);
@@ -142,7 +158,6 @@ function _range_field_instance_subelements_settings_form(&$form, $name, $setting
     '#type' => 'fieldset',
     '#title' => $settings[$name]['label'],
   );
-
   $form[$name]['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Form element label'),
@@ -256,6 +271,7 @@ function range_field_formatter_info() {
         'scale' => 0,
         'from_prefix_suffix' => TRUE,
         'to_prefix_suffix' => TRUE,
+        'field_prefix_suffix' => TRUE,
       ),
     ),
     'range_decimal' => array(
@@ -269,6 +285,7 @@ function range_field_formatter_info() {
         'scale' => 2,
         'from_prefix_suffix' => TRUE,
         'to_prefix_suffix' => TRUE,
+        'field_prefix_suffix' => TRUE,
       ),
     ),
     'range_unformatted' => array(
@@ -339,6 +356,11 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#title' => t('Display <em>TO value</em> prefix and suffix.'),
       '#default_value' => $settings['to_prefix_suffix'],
     );
+    $element['field_prefix_suffix'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display <em>field</em> prefix and suffix.'),
+      '#default_value' => $settings['field_prefix_suffix'],
+    );
   }
 
   return $element;
@@ -364,6 +386,9 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
     }
     if ($settings['to_prefix_suffix']) {
       $summary[] = t('Display with <em>TO value</em> prefix and suffix.');
+    }
+    if ($settings['field_prefix_suffix']) {
+      $summary[] = t('Display with <em>field</em> prefix and suffix.');
     }
   }
 
@@ -391,6 +416,9 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
         else {
           $output = _range_field_formatter_view_separate_values($from_value, $to_value, $settings, $instance['settings']);
         }
+
+        // Add field prefix/suffix.
+        $output = _range_field_formatter_view_prefix_suffix($output, $settings['field_prefix_suffix'], $instance['settings']['field']);
 
         $element[$delta] = array('#markup' => $output);
       }
@@ -556,8 +584,14 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       ) + $base;
 
   // Add prefixes and suffixes.
-  _range_field_widget_form_subelement_prefix_suffix($element, 'from', $instance['settings']);
-  _range_field_widget_form_subelement_prefix_suffix($element, 'to', $instance['settings']);
+  if (!empty($settings['field']['prefix'])) {
+    $settings['from']['prefix'] = $settings['field']['prefix'] . $settings['from']['prefix'];
+  }
+  if (!empty($settings['field']['suffix'])) {
+    $settings['to']['suffix'] .= $settings['field']['suffix'];
+  }
+  _range_field_widget_form_subelement_prefix_suffix($element, 'from', $settings);
+  _range_field_widget_form_subelement_prefix_suffix($element, 'to', $settings);
 
   $element['#element_validate'][] = 'range_field_widget_validate';
 

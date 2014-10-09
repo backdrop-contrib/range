@@ -89,3 +89,20 @@ function range_update_7002() {
     }
   }
 }
+
+/**
+ * Updates range field instances' settings.
+ */
+function range_update_7003() {
+  $instances = field_info_instances();
+  foreach ($instances as $entity_type) {
+    foreach ($entity_type as $bundle) {
+      foreach ($bundle as $instance) {
+        if ($instance['widget']['type'] === 'range') {
+          $instance['settings']['field'] = array('prefix' => '', 'suffix' => '');
+          field_update_instance($instance);
+        }
+      }
+    }
+  }
+}
