@@ -261,6 +261,7 @@ function range_field_formatter_info() {
       'field types' => array('range_integer'),
       'settings' => array(
         'range_combine' => FALSE,
+        'number_formatter' => 'number_format',
         'range_separator' => '-',
         'thousand_separator' => ' ',
         // The 'decimal_separator' and 'scale' settings are not configurable
@@ -269,6 +270,7 @@ function range_field_formatter_info() {
         // formatters can use the same code.
         'decimal_separator' => '.',
         'scale' => 0,
+        'format_string' => '%d',
         'from_prefix_suffix' => TRUE,
         'to_prefix_suffix' => TRUE,
         'field_prefix_suffix' => TRUE,
@@ -279,10 +281,12 @@ function range_field_formatter_info() {
       'field types' => array('range_decimal', 'range_float'),
       'settings' => array(
         'range_combine' => FALSE,
+        'number_formatter' => 'number_format',
         'range_separator' => '-',
         'thousand_separator' => ' ',
         'decimal_separator' => '.',
         'scale' => 2,
+        'format_string' => '%.2f',
         'from_prefix_suffix' => TRUE,
         'to_prefix_suffix' => TRUE,
         'field_prefix_suffix' => TRUE,
@@ -312,6 +316,15 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#default_value' => $settings['range_separator'],
   );
   if ($display['type'] == 'range_decimal' || $display['type'] == 'range_integer') {
+    $element['number_formatter'] = array(
+      '#type' => 'radios',
+      '#title' => t('Number formatter'),
+      '#options' => array('number_format' => t('Simple (using <strong>number_format</strong>)'), 'sprintf' => t('Advanced (using <strong>sprintf</strong>)')),
+      '#default_value' => $settings['number_formatter'],
+      '#attributes' => array(
+        'class' => array('range-field-formatter-settings-number-formatter'),
+      ),
+    );
     $options = array(
       '' => t('<none>'),
       '.' => t('Decimal point'),
@@ -323,14 +336,23 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#title' => t('Thousand marker'),
       '#options' => $options,
       '#default_value' => $settings['thousand_separator'],
+      '#states' => array(
+        'visible' => array(
+          '.range-field-formatter-settings-number-formatter' => array('value' => 'number_format'),
+        ),
+      ),
     );
-
     if ($display['type'] == 'range_decimal') {
       $element['decimal_separator'] = array(
         '#type' => 'select',
         '#title' => t('Decimal marker'),
         '#options' => array('.' => t('Decimal point'), ',' => t('Comma')),
         '#default_value' => $settings['decimal_separator'],
+        '#states' => array(
+          'visible' => array(
+            '.range-field-formatter-settings-number-formatter' => array('value' => 'number_format'),
+          ),
+        ),
       );
       $element['scale'] = array(
         '#type' => 'select',
@@ -338,8 +360,24 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
         '#options' => drupal_map_assoc(range(0, 10)),
         '#default_value' => $settings['scale'],
         '#description' => t('The number of digits to the right of the decimal.'),
+        '#states' => array(
+          'visible' => array(
+            '.range-field-formatter-settings-number-formatter' => array('value' => 'number_format'),
+          ),
+        ),
       );
     }
+    $element['format_string'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Format'),
+      '#description' => t('See <a href="!url">PHP documentation</a> for a description of format. <strong>Due to PHP limitations, thousand separator cannot be used.</strong>', array('!url' => 'http://php.net/manual/en/function.sprintf.php')),
+      '#default_value' => $settings['format_string'],
+      '#states' => array(
+        'visible' => array(
+          '.range-field-formatter-settings-number-formatter' => array('value' => 'sprintf'),
+        ),
+      ),
+    );
     $element['range_combine'] = array(
       '#type' => 'checkbox',
       '#title' => t('Combine equivalent values'),
@@ -358,7 +396,7 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
     );
     $element['field_prefix_suffix'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display <em>field</em> prefix and suffix.'),
+      '#title' => t('Display <em>FIELD value</em> prefix and suffix.'),
       '#default_value' => $settings['field_prefix_suffix'],
     );
   }
@@ -375,9 +413,15 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $summary = array();
   if ($display['type'] == 'range_decimal' || $display['type'] == 'range_integer') {
-    $from = number_format(1234.1234567890, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
-    $to = number_format(4321.0987654321, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
-    $summary[] = $from . $settings['range_separator'] . $to;
+    $from = _range_number_format(1234.1234567890, $settings);
+    $to = _range_number_format(4321.0987654321, $settings);
+    $summary[] = $from . field_filter_xss($settings['range_separator']) . $to;
+    if ($settings['number_formatter'] === 'number_format') {
+      $summary[] = t('Formatted using <strong>number_format</strong>.');
+    }
+    else {
+      $summary[] = t('Formatted using <strong>sprintf</strong>.');
+    }
     if ($settings['range_combine']) {
       $summary[] = t('Equivalent values will be combined into a single value.');
     }
@@ -388,7 +432,7 @@ function range_field_formatter_settings_summary($field, $instance, $view_mode) {
       $summary[] = t('Display with <em>TO value</em> prefix and suffix.');
     }
     if ($settings['field_prefix_suffix']) {
-      $summary[] = t('Display with <em>field</em> prefix and suffix.');
+      $summary[] = t('Display with <em>FIELD value</em> prefix and suffix.');
     }
   }
 
@@ -406,8 +450,8 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
     case 'range_integer':
     case 'range_decimal':
       foreach ($items as $delta => $item) {
-        $from_value = number_format($item['from'], $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
-        $to_value = number_format($item['to'], $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
+        $from_value = _range_number_format($item['from'], $settings);
+        $to_value = _range_number_format($item['to'], $settings);
 
         // Combine values if they are equal.
         if (!empty($settings['range_combine']) && $from_value === $to_value) {
@@ -432,6 +476,32 @@ function range_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * Helper function. Formats a number according to formatter settings.
+ *
+ * @param int|double $number
+ *   Number to format.
+ * @param array $settings
+ *   Array of formatter settings:
+ *     - number_formatter: type of number formatter (either number_format or
+ *       sprintf)
+ *     - format_string: format string for sprintf() function
+ *     - scale: number scale
+ *     - decimal_separator: string, used as a decimal separator
+ *     - thousand_separator: string, used as a thousand separator.
+ * @return string
+ *   Formatted number.
+ */
+function _range_number_format($number, $settings) {
+  switch ($settings['number_formatter']) {
+    case 'sprintf':
+      return sprintf(field_filter_xss($settings['format_string']), $number);
+    case 'number_format':
+    default:
+      return number_format($number, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
+  }
 }
 
 /**
@@ -501,7 +571,7 @@ function _range_field_formatter_view_separate_values($from_value, $to_value, $se
   $from = _range_field_formatter_view_prefix_suffix($from_value, $settings['from_prefix_suffix'], $instance_settings['from']);
   $to = _range_field_formatter_view_prefix_suffix($to_value, $settings['to_prefix_suffix'], $instance_settings['to']);
 
-  return $from . $settings['range_separator'] . $to;
+  return $from . field_filter_xss($settings['range_separator']) . $to;
 }
 
 /**

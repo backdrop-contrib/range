@@ -42,33 +42,43 @@ function range_field_schema($field) {
   );
 }
 
+function _range_update_instances(callable $callback) {
+  $instances = field_info_instances();
+  foreach ($instances as $entity_type) {
+    foreach ($entity_type as $bundle) {
+      foreach ($bundle as $instance) {
+        if ($callback($instance)) {
+          field_update_instance($instance);
+        }
+      }
+    }
+  }
+}
+
 /**
  * Converts existing field instances settings to support separate prefix and
  * suffix for the FROM and TO values.
  */
 function range_update_7001() {
-  $instances = field_info_instances();
-  foreach ($instances as $entity_type) {
-    foreach ($entity_type as $bundle) {
-      foreach ($bundle as $instance) {
-        if ($instance['widget']['type'] == 'range') {
-          if (!empty($instance['settings']['prefix'])) {
-            $instance['settings']['from']['prefix'] = $instance['settings']['prefix'];
-          }
-          if (!empty($instance['settings']['suffix'])) {
-            $instance['settings']['to']['suffix'] = $instance['settings']['suffix'];
-          }
-          unset($instance['settings']['prefix'], $instance['settings']['suffix']);
+  _range_update_instances('_range_update_instance_7001');
+}
 
-          foreach (element_children($instance['display']) as $view_mode) {
-            $e = &$instance['display'][$view_mode]['settings'];
-            $e['from_prefix_suffix'] = $e['to_prefix_suffix'] = $e['prefix_suffix'];
-            unset($e['prefix_suffix']);
-          }
-          field_update_instance($instance);
-        }
-      }
+function _range_update_instance_7001(&$instance) {
+  if ($instance['widget']['type'] == 'range') {
+    if (!empty($instance['settings']['prefix'])) {
+      $instance['settings']['from']['prefix'] = $instance['settings']['prefix'];
     }
+    if (!empty($instance['settings']['suffix'])) {
+      $instance['settings']['to']['suffix'] = $instance['settings']['suffix'];
+    }
+    unset($instance['settings']['prefix'], $instance['settings']['suffix']);
+
+    foreach (element_children($instance['display']) as $view_mode) {
+      $e = &$instance['display'][$view_mode]['settings'];
+      $e['from_prefix_suffix'] = $e['to_prefix_suffix'] = $e['prefix_suffix'];
+      unset($e['prefix_suffix']);
+    }
+    return TRUE;
   }
 }
 
@@ -76,17 +86,14 @@ function range_update_7001() {
  * Updates range field instances' settings.
  */
 function range_update_7002() {
-  $instances = field_info_instances();
-  foreach ($instances as $entity_type) {
-    foreach ($entity_type as $bundle) {
-      foreach ($bundle as $instance) {
-        if ($instance['widget']['type'] === 'range') {
-          $instance['settings']['from']['label'] = t('From');
-          $instance['settings']['to']['label'] = t('to');
-          field_update_instance($instance);
-        }
-      }
-    }
+  _range_update_instances('_range_update_instance_7002');
+}
+
+function _range_update_instance_7002(&$instance) {
+  if ($instance['widget']['type'] === 'range') {
+    $instance['settings']['from']['label'] = t('From');
+    $instance['settings']['to']['label'] = t('to');
+    return TRUE;
   }
 }
 
@@ -94,15 +101,33 @@ function range_update_7002() {
  * Updates range field instances' settings.
  */
 function range_update_7003() {
-  $instances = field_info_instances();
-  foreach ($instances as $entity_type) {
-    foreach ($entity_type as $bundle) {
-      foreach ($bundle as $instance) {
-        if ($instance['widget']['type'] === 'range') {
-          $instance['settings']['field'] = array('prefix' => '', 'suffix' => '');
-          field_update_instance($instance);
-        }
-      }
+  _range_update_instances('_range_update_instance_7003');
+}
+
+function _range_update_instance_7003(&$instance) {
+  if ($instance['widget']['type'] === 'range') {
+    $instance['settings']['field'] = array('prefix' => '', 'suffix' => '');
+    return TRUE;
+  }
+}
+
+/**
+ * Updates range field formatters' settings.
+ */
+function range_update_7004() {
+  _range_update_instances('_range_update_instance_7004');
+}
+
+function _range_update_instance_7004(&$instance) {
+  $return = FALSE;
+  foreach ($instance['display'] as $view_mode => $display) {
+    if (in_array($display['type'], array('range_integer', 'range_decimal'))) {
+      $instance['display'][$view_mode]['settings'] += array(
+        'number_formatter' => 'number_format',
+        'format_string' => $display['type'] === 'range_integer' ? '%d' : '%.2f',
+      );
+      $return = TRUE;
     }
   }
+  return $return;
 }
