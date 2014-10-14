@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains filter handlers for range filters with views.
+ * Contains filter handlers for numeric range filters with views.
  */
 
 /**
  * Filter handler for limiting a view to entities which lies within a range.
  */
-class range_views_handler_filter_range extends views_handler_filter {
+class range_handler_filter_numeric_range extends views_handler_filter {
 
   var $always_multiple = TRUE;
 

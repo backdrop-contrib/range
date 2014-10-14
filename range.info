@@ -4,4 +4,4 @@ package = Fields
 core = 7.x
 dependencies[] = field
 
-files[] = views/range_views_handler_filter_range.inc
+files[] = views/range_handler_filter_numeric_range.inc

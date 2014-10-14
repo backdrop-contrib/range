@@ -30,7 +30,7 @@ function range_views_data() {
     }
     $base = array(
       'table' => $current_table,
-      'handler' => 'range_views_handler_filter_range',
+      'handler' => 'range_handler_filter_numeric_range',
       'field_name' => $field['field_name'],
       'allow empty' => FALSE,
       'additional fields' => $add_fields,
