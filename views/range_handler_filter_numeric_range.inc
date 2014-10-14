@@ -92,10 +92,10 @@ class range_handler_filter_numeric_range extends views_handler_filter {
       '<=', '>=',
     );
 
-    $inlude_endpoints = !($this->options['include_endpoints'] xor ($this->operator == 'within'));
+    $inlude_endpoints = !($this->options['include_endpoints'] xor ($this->operator === 'within'));
     list($op_left, $op_right) = array_slice($operators, $inlude_endpoints ? 2 : 0, 2);
 
-    if ($this->operator == 'within') {
+    if ($this->operator === 'within') {
       $this->query->add_where($this->options['group'], db_and()->condition($field_from, $this->value, $op_left)->condition($field_to, $this->value, $op_right));
     }
     else {
