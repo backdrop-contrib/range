@@ -29,7 +29,6 @@ function range_views_data() {
       $add_fields[$column_name] = _field_sql_storage_columnname($field['field_name'], $column_name);
     }
     $base = array(
-      'table' => $current_table,
       'handler' => 'range_handler_filter_numeric_range',
       'field_name' => $field['field_name'],
       'allow empty' => FALSE,
@@ -38,9 +37,11 @@ function range_views_data() {
 
     $data[$current_table][$field['field_name']]['filter'] = array(
       'title' => t('@label range filter', array('@label' => $label)),
+      'table' => $current_table,
     ) + $base;
     $data[$revision_table][$field['field_name'] . '-' . 'revision_id']['filter'] = array(
       'title' => t('@label range filter (historical data)', array('@label' => $label)),
+      'table' => $revision_table,
     ) + $base;
   }
 
