@@ -1,4 +1,4 @@
-name = Range field
+name = Numeric range
 description = Provides numeric range field.
 package = Fields
 core = 7.x
