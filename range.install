@@ -131,3 +131,32 @@ function _range_update_instance_7004(&$instance) {
   }
   return $return;
 }
+
+/**
+ * Introduces new field formatter.
+ */
+function range_update_7005() {
+  _range_update_instances('_range_update_instance_7005');
+}
+
+function _range_update_instance_7005(&$instance) {
+  $return = FALSE;
+  foreach ($instance['display'] as $view_mode => $display) {
+    if ($display['type'] === 'range_unformatted') {
+      $instance['display'][$view_mode]['settings'] += array(
+        'from_prefix_suffix' => FALSE,
+        'to_prefix_suffix' => FALSE,
+        'field_prefix_suffix' => FALSE,
+      );
+      $return = TRUE;
+    }
+
+    if ($display['settings']['number_formatter'] === 'sprintf') {
+      $instance['display'][$view_mode]['type'] = $display['type'] === 'range_integer' ? 'range_integer_sprintf' : 'range_decimal_sprintf';
+      unset($display['settings']['number_formatter'], $display['settings']['thousand_separator'], $display['settings']['decimal_separator'], $display['settings']['scale']);
+      $instance['display'][$view_mode]['settings'] = $display['settings'];
+      $return = TRUE;
+    }
+  }
+  return $return;
+}
