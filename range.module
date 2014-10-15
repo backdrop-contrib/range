@@ -476,12 +476,12 @@ function _range_number_format($number, $display_type, $settings) {
   switch ($display_type) {
     case 'range_integer':
     case 'range_decimal':
-      return number_format($number, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
+      return (string) number_format($number, $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
     case 'range_integer_sprintf':
     case 'range_decimal_sprintf':
-      return sprintf(field_filter_xss($settings['format_string']), $number);
+      return (string) sprintf(field_filter_xss($settings['format_string']), $number);
     default:
-      return $number;
+      return (string) $number;
   }
 }
 

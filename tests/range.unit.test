@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Unit tests for Range module.
+ */
+
+/**
+ * Unit tests for Range.
+ */
+class RangeUnitTestCase extends DrupalUnitTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Range unit tests',
+      'description' => 'Tests range formatter layer.',
+      'group' => 'Range',
+    );
+  }
+
+  /**
+   * Tests range number formatter.
+   */
+  public function testRangeNumberFormat() {
+    $integer_number = 1234;
+    $float_number = 1234.56789;
+
+    // Test formatting an integer using number_format().
+    $result = _range_number_format($integer_number, 'range_integer', array('scale' => 0, 'decimal_separator' => '.', 'thousand_separator' => ' '));
+    $this->assertIdentical($result, '1 234', format_string('Integer number is formatted correctly using number_format(): <strong>@output<strong>', array('@output' => var_export($result, TRUE))));
+
+    // Test formatting a float using number_format().
+    $result = _range_number_format($float_number, 'range_decimal', array('scale' => 3, 'decimal_separator' => '.', 'thousand_separator' => ' '));
+    $this->assertIdentical($result, '1 234.568', format_string('Float number is formatted correctly using number_format(): <strong>@output<strong>', array('@output' => var_export($result, TRUE))));
+
+    // Test formatting an integer using sprintf().
+    $result = _range_number_format($integer_number, 'range_integer_sprintf', array('format_string' => '%06d'));
+    $this->assertIdentical($result, '001234', format_string('Integer number is formatted correctly using sprintf(): <strong>@output<strong>', array('@output' => var_export($result, TRUE))));
+
+    // Test formatting a float using sprintf().
+    $result = _range_number_format($float_number, 'range_decimal_sprintf', array('format_string' => '%.4f'));
+    $this->assertIdentical($result, '1234.5679', format_string('Float number is formatted correctly using sprintf(): <strong>@output<strong>', array('@output' => var_export($result, TRUE))));
+    // Test raw formatter.
+    $result = _range_number_format($float_number, 'range_unformatted', array());
+    $this->assertIdentical($result, '1234.56789', format_string('Unformatted float number is displayed correctly: <strong>@output<strong>', array('@output' => var_export($result, TRUE))));
+  }
+
+}
