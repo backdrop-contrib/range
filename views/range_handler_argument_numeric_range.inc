@@ -10,7 +10,10 @@
  */
 class range_handler_argument_numeric_range extends views_handler_argument {
 
-  function option_definition() {
+  /**
+   * {@inheritdoc}
+   */
+  public function option_definition() {
     $options = parent::option_definition();
 
     $options['operator'] = array('default' => 'within', 'bool' => FALSE);
@@ -19,7 +22,10 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     return $options;
   }
 
-  function options_form(&$form, &$form_state) {
+  /**
+   * {@inheritdoc}
+   */
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
     $form['operator'] = array(
@@ -41,7 +47,10 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     );
   }
 
-  function query($group_by = false) {
+  /**
+   * {@inheritdoc}
+   */
+  public function query($group_by = FALSE) {
     $this->ensure_my_table();
     $field_from = $this->table_alias . '.' . $this->definition['additional fields']['from'];
     $field_to = $this->table_alias . '.' . $this->definition['additional fields']['to'];
@@ -63,7 +72,10 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     }
   }
 
-  function get_sort_name() {
+  /**
+   * {@inheritdoc}
+   */
+  public function get_sort_name() {
     return t('Numerical', array(), array('context' => 'Sort order'));
   }
 

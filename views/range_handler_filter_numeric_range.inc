@@ -10,9 +10,12 @@
  */
 class range_handler_filter_numeric_range extends views_handler_filter {
 
-  var $always_multiple = TRUE;
+  protected $always_multiple = TRUE;
 
-  function option_definition() {
+  /**
+   * {@inheritdoc}
+   */
+  public function option_definition() {
     $options = parent::option_definition();
 
     $options['operator'] = array('default' => 'within');
@@ -25,7 +28,7 @@ class range_handler_filter_numeric_range extends views_handler_filter {
   /**
    * Define the operators supported for ranges.
    */
-  function operators() {
+  protected function operators() {
     $operators = array(
       'within' => array(
         'title' => t('Range contains'),
@@ -44,6 +47,9 @@ class range_handler_filter_numeric_range extends views_handler_filter {
     return $operators;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function operator_options() {
     $options = array();
     foreach ($this->operators() as $key => $value) {
@@ -53,16 +59,22 @@ class range_handler_filter_numeric_range extends views_handler_filter {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['include_endpoints'] = array(
       '#type' => 'checkbox',
       '#title' => t('Include endpoints'),
       '#default_value' => $this->options['include_endpoints'],
-      '#description' => t('Whether or not include endpoints into the query.')
+      '#description' => t('Whether or not include endpoints into the query.'),
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function value_form(&$form, &$form_state) {
     $form['value'] = array(
       '#type' => 'textfield',
@@ -72,7 +84,10 @@ class range_handler_filter_numeric_range extends views_handler_filter {
     );
   }
 
-  function query() {
+  /**
+   * {@inheritdoc}
+   */
+  public function query() {
     $this->ensure_my_table();
     $field_from = $this->table_alias . '.' . $this->definition['additional fields']['from'];
     $field_to = $this->table_alias . '.' . $this->definition['additional fields']['to'];
@@ -86,7 +101,7 @@ class range_handler_filter_numeric_range extends views_handler_filter {
   /**
    * Operation callback.
    */
-  function op_within($field_from, $field_to) {
+  protected function op_within($field_from, $field_to) {
     $operators = array(
       '<', '>',
       '<=', '>=',
@@ -103,7 +118,10 @@ class range_handler_filter_numeric_range extends views_handler_filter {
     }
   }
 
-  function admin_summary() {
+  /**
+   * {@inheritdoc}
+   */
+  public function admin_summary() {
     if ($this->is_a_group()) {
       return t('grouped');
     }

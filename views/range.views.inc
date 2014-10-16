@@ -27,21 +27,25 @@ function range_views_data() {
 }
 
 /**
- * Returns required by Views information for a given field. Field data is being
- * statically cached.
+ * Helper function. Returns misc data for a given field.
+ *
+ * This function returns misc field data, that is required by various Views
+ * plugins. Data includes field label, current and revision table names, field
+ * columns.
+ *
+ * Field data is being statically cached.
  *
  * @param array $field
  *   Field definition.
+ *
  * @return array
- *   Array containing:
- *     - label: Field label
- *     - current_table: Name of the table that contains current revision data
- *       for a given field
- *     - revision_table: Name of the table that contains historical data for a
- *       given field
- *     - add_fields: Array of field data columns keyed by column name.
+ *   Field data array containing:
+ *     - Field label
+ *     - Name of the table that contains current revision data for a given field
+ *     - Name of the table that contains historical data for a given field
+ *     - Array of field data columns keyed by column name.
  */
-function _range_views_data_base_information($field) {
+function _range_views_data_base_information(array $field) {
   static $information = array();
 
   if (empty($information[$field['field_name']])) {
@@ -63,14 +67,14 @@ function _range_views_data_base_information($field) {
 }
 
 /**
- * Return range filters data for views.
+ * Provides views filter handler data.
  *
  * @param array $data
  *   Views data array.
  * @param array $field
  *   Field definition.
  */
-function _range_views_data_filter_handler(&$data, $field) {
+function _range_views_data_filter_handler(array &$data, array $field) {
   list($label, $current_table, $revision_table, $add_fields) = _range_views_data_base_information($field);
 
   $base = array(
@@ -91,14 +95,14 @@ function _range_views_data_filter_handler(&$data, $field) {
 }
 
 /**
- * Return range arguments data for views.
+ * Provides views argument handler data.
  *
  * @param array $data
  *   Views data array.
  * @param array $field
  *   Field definition.
  */
-function _range_views_data_argument_handler(&$data, $field) {
+function _range_views_data_argument_handler(array &$data, array $field) {
   list($label, $current_table, $revision_table, $add_fields) = _range_views_data_base_information($field);
 
   $base = array(

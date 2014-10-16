@@ -10,6 +10,9 @@
  */
 class RangeUnitTestCase extends DrupalUnitTestCase {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
       'name' => 'Range unit tests',
