@@ -10,7 +10,7 @@
  */
 class range_handler_filter_numeric_range extends views_handler_filter {
 
-  protected $always_multiple = TRUE;
+  public $always_multiple = TRUE;
 
   /**
    * {@inheritdoc}
