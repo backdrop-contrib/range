@@ -10,3 +10,6 @@ files[] = tests/range.unit.test
 ; Views handlers
 files[] = views/range_handler_filter_numeric_range.inc
 files[] = views/range_handler_argument_numeric_range.inc
+
+; Migrate handlers
+files[] = migrate/destinations/range.inc
