@@ -29,7 +29,7 @@ function range_field_info() {
   );
   return array(
     'range_integer' => array(
-      'label' => t('Integer range'),
+      'label' => t('Range: integer'),
       'description' => t('This field stores a range in the database as an integer.'),
       'instance_settings' => $instance_settings,
       'default_widget' => 'range',
@@ -38,7 +38,7 @@ function range_field_info() {
       'property_callbacks' => array('range_metadata_field_range_callback'),
     ),
     'range_decimal' => array(
-      'label' => t('Decimal range'),
+      'label' => t('Range: decimal'),
       'description' => t('This field stores a range in the database in a fixed decimal format.'),
       'settings' => array(
         'precision' => 10,
@@ -52,7 +52,7 @@ function range_field_info() {
       'property_callbacks' => array('range_metadata_field_range_callback'),
     ),
     'range_float' => array(
-      'label' => t('Float range'),
+      'label' => t('Range: float'),
       'description' => t('This field stores a range in the database in a floating point format.'),
       'settings' => array(
         'decimal_separator' => '.',
