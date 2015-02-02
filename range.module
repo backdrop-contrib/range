@@ -328,7 +328,7 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
     $element['decimal_separator'] = array(
       '#type' => 'select',
       '#title' => t('Decimal marker'),
-      '#options' => array('.' => t('Decimal point'), ',' => t('Comma')),
+      '#options' => array('.' => t('Decimal point'), ',' => t('Comma'), ', ' => t('Comma and space')),
       '#default_value' => $settings['decimal_separator'],
     );
     $element['scale'] = array(
