@@ -32,7 +32,7 @@ class MigrateRangeFieldHandler extends MigrateFieldHandler {
   /**
    * {@inheritdocs}
    */
-  static function arguments($from = NULL, $to = NULL, $language = NULL) {
+  static public function arguments($from = NULL, $to = NULL, $language = NULL) {
     $arguments = array();
     if (!is_null($from)) {
       $arguments['from'] = $from;
@@ -95,7 +95,7 @@ class MigrateRangeFieldHandler extends MigrateFieldHandler {
   /**
    * Determines field language.
    *
-   * @param stdClass $entity
+   * @param object $entity
    *   Entity being processed.
    * @param array $field_info
    *   Field info.
@@ -103,10 +103,11 @@ class MigrateRangeFieldHandler extends MigrateFieldHandler {
    *   Arguments passed to the field migration handler.
    * @param int $delta
    *   Field values delta.
+   *
    * @return string
    *   Language code.
    *
-   * @see MigrateFieldHandler::getFieldLanguage().
+   * @see MigrateFieldHandler::getFieldLanguage()
    */
   public function getRangeFieldLanguage($entity, array $field_info, array $arguments, $delta = 0) {
     static $language = NULL;
@@ -131,7 +132,7 @@ class MigrateRangeFieldHandler extends MigrateFieldHandler {
   /**
    * Validates given range field value item.
    *
-   * @param stdClass $entity
+   * @param object $entity
    *   Entity being processed.
    * @param array $field_info
    *   Field info.
@@ -139,6 +140,7 @@ class MigrateRangeFieldHandler extends MigrateFieldHandler {
    *   Field instance.
    * @param array $item
    *   Field values delta.
+   *
    * @return bool
    *   Returns TRUE if given item contains valid range field value, FALSE -
    *   otherwise.
