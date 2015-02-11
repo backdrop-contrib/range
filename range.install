@@ -48,15 +48,15 @@ function range_field_schema($field) {
  * Loops through all field instances. Executes given callback with each instance
  * as a parameter.
  *
- * @param callable $callback
+ * @param string $callback
  *   Callback to execute for every field instance.
  */
-function _range_update_instances(callable $callback) {
+function _range_update_instances($callback) {
   $instances = field_info_instances();
   foreach ($instances as $entity_type) {
     foreach ($entity_type as $bundle) {
       foreach ($bundle as $instance) {
-        if ($callback($instance)) {
+        if (function_exists($callback) && $callback($instance)) {
           field_update_instance($instance);
         }
       }
