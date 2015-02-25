@@ -207,7 +207,7 @@ function _range_update_instance_7005(array &$instance) {
       $return = TRUE;
     }
 
-    if ($display['settings']['number_formatter'] === 'sprintf') {
+    if (!empty($display['settings']['number_formatter']) && $display['settings']['number_formatter'] === 'sprintf') {
       $instance['display'][$view_mode]['type'] = $display['type'] === 'range_integer' ? 'range_integer_sprintf' : 'range_decimal_sprintf';
       unset($display['settings']['number_formatter'], $display['settings']['thousand_separator'], $display['settings']['decimal_separator'], $display['settings']['scale']);
       $instance['display'][$view_mode]['settings'] = $display['settings'];
