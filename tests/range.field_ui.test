@@ -32,10 +32,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Creates range field via field UI.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _testRangeFieldCreationUI($field_type) {
     $this->drupalGet("admin/structure/types/manage/{$this->contentType->type}/fields");
@@ -52,21 +50,21 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Sets range field settings via field UI.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _testRangeFieldSettingsUI($field_type) {
     switch ($field_type) {
       case 'range_integer':
         $edit = array();
         break;
+
       case 'range_float':
         $edit = array(
           'field[settings][decimal_separator]' => static::FIELD_SETTINGS_DECIMAL_SEPARATOR,
         );
         break;
+
       case 'range_decimal':
         $edit = array(
           'field[settings][decimal_separator]' => static::FIELD_SETTINGS_DECIMAL_SEPARATOR,
@@ -74,6 +72,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
           'field[settings][scale]' => static::FIELD_SETTINGS_SCALE,
         );
         break;
+
       default:
         $edit = array();
     }
@@ -86,10 +85,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Verifies that range field has correct settings.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _verifyRangeFieldSettings($field_type) {
     $field = field_info_field("field_$field_type");
@@ -98,6 +95,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
       case 'range_float':
         $this->assertEqual($field['settings']['decimal_separator'], static::FIELD_SETTINGS_DECIMAL_SEPARATOR, format_string('Correct decimal separator setting %value found for %field_type', array('%value' => $field['settings']['decimal_separator'], '%field_type' => $field['type'])));
         break;
+
       case 'range_decimal':
         $this->assertEqual($field['settings']['decimal_separator'], static::FIELD_SETTINGS_DECIMAL_SEPARATOR, format_string('Correct decimal separator setting %value found for %field_type', array('%value' => $field['settings']['decimal_separator'], '%field_type' => $field['type'])));
         $this->assertEqual($field['settings']['precision'], static::FIELD_SETTINGS_PRECISION, format_string('Correct precision setting %value found for %field_type', array('%value' => $field['settings']['precision'], '%field_type' => $field['type'])));
@@ -110,10 +108,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Sets range field instance settings via field UI.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _testRangeFieldInstanceSettingsUI($field_type) {
     switch ($field_type) {
@@ -133,6 +129,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
           'instance[settings][to][suffix]' => static::INSTANCE_SETTINGS_TO_SUFFIX,
         );
         break;
+
       default:
         $edit = array();
     }
@@ -145,10 +142,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Verifies that range field instance has correct settings.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _verifyRangeFieldInstanceSettings($field_type) {
     $field = field_info_field("field_$field_type");
@@ -170,10 +165,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    * Helper method. Tests given range field type via field UI.
    *
    * @param string $field_type
-   *   Range field type. Could be one of the following values:
-   *     - range_integer
-   *     - range_float
-   *     - range_decimal
+   *   Range field type. Could be one of the following values: range_integer,
+   *   range_float or range_decimal.
    */
   protected function _testRangeFieldUI($field_type) {
     $this->_testRangeFieldCreationUI($field_type);
