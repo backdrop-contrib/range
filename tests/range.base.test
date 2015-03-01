@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file
+ * Contains range base test class.
+ */
+
+/**
+ * Base class for the range module's tests.
+ */
+class RangeBaseWebTestCase extends DrupalWebTestCase {
+
+  const FIELD_SETTINGS_DECIMAL_SEPARATOR = ',';
+
+  const FIELD_SETTINGS_PRECISION = 12;
+
+  const FIELD_SETTINGS_SCALE = 4;
+
+  const INSTANCE_SETTINGS_MIN = 5;
+
+  const INSTANCE_SETTINGS_MAX = 25;
+
+  const INSTANCE_SETTINGS_FIELD_PREFIX = 'FIELD_PREFIX';
+
+  const INSTANCE_SETTINGS_FIELD_SUFFIX = 'FIELD_SUFFIX';
+
+  const INSTANCE_SETTINGS_FROM_LABEL = 'FROM_LABEL';
+
+  const INSTANCE_SETTINGS_FROM_PREFIX = 'FROM_PREFIX';
+
+  const INSTANCE_SETTINGS_FROM_SUFFIX = 'FROM_SUFFIX';
+
+  const INSTANCE_SETTINGS_TO_LABEL = 'TO_LABEL';
+
+  const INSTANCE_SETTINGS_TO_PREFIX = 'TO_PREFIX';
+
+  const INSTANCE_SETTINGS_TO_SUFFIX = 'TO_SUFFIX';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $profile = 'testing';
+
+  /**
+   * Content type we are testing against.
+   *
+   * @var stdClass
+   */
+  protected $contentType;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'range';
+    parent::setUp($modules);
+
+    $account = $this->drupalCreateUser(array('administer content types', 'administer nodes'));
+    $this->drupalLogin($account);
+
+    $this->contentType = $this->drupalCreateContentType();
+  }
+
+}

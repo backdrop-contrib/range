@@ -1,0 +1,195 @@
+<?php
+
+/**
+ * @file
+ * Contains range field UI tests.
+ */
+
+/**
+ * Tests adding range fields and their settings via field UI.
+ */
+class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
+
+  /**
+   * Meta information about tests.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Range field UI tests',
+      'description' => 'Tests adding range fields and their settings via field UI.',
+      'group' => 'Range',
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp(array('field_ui'));
+  }
+
+  /**
+   * Helper method. Creates range field via field UI.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _testRangeFieldCreationUI($field_type) {
+    $this->drupalGet("admin/structure/types/manage/{$this->contentType->type}/fields");
+    $edit = array(
+      'fields[_add_new_field][label]' => $this->randomName(),
+      'fields[_add_new_field][field_name]' => $field_type,
+      'fields[_add_new_field][type]' => $field_type,
+      'fields[_add_new_field][widget_type]' => 'range',
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+  }
+
+  /**
+   * Helper method. Sets range field settings via field UI.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _testRangeFieldSettingsUI($field_type) {
+    switch ($field_type) {
+      case 'range_integer':
+        $edit = array();
+        break;
+      case 'range_float':
+        $edit = array(
+          'field[settings][decimal_separator]' => static::FIELD_SETTINGS_DECIMAL_SEPARATOR,
+        );
+        break;
+      case 'range_decimal':
+        $edit = array(
+          'field[settings][decimal_separator]' => static::FIELD_SETTINGS_DECIMAL_SEPARATOR,
+          'field[settings][precision]' => static::FIELD_SETTINGS_PRECISION,
+          'field[settings][scale]' => static::FIELD_SETTINGS_SCALE,
+        );
+        break;
+      default:
+        $edit = array();
+    }
+
+    $this->drupalPost(NULL, $edit, t('Save field settings'));
+    field_cache_clear();
+  }
+
+  /**
+   * Helper method. Verifies that range field has correct settings.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _verifyRangeFieldSettings($field_type) {
+    $field = field_info_field("field_$field_type");
+
+    switch ($field_type) {
+      case 'range_float':
+        $this->assertEqual($field['settings']['decimal_separator'], static::FIELD_SETTINGS_DECIMAL_SEPARATOR, format_string('Correct decimal separator setting %value found for %field_type', array('%value' => $field['settings']['decimal_separator'], '%field_type' => $field['type'])));
+        break;
+      case 'range_decimal':
+        $this->assertEqual($field['settings']['decimal_separator'], static::FIELD_SETTINGS_DECIMAL_SEPARATOR, format_string('Correct decimal separator setting %value found for %field_type', array('%value' => $field['settings']['decimal_separator'], '%field_type' => $field['type'])));
+        $this->assertEqual($field['settings']['precision'], static::FIELD_SETTINGS_PRECISION, format_string('Correct precision setting %value found for %field_type', array('%value' => $field['settings']['precision'], '%field_type' => $field['type'])));
+        $this->assertEqual($field['settings']['scale'], static::FIELD_SETTINGS_SCALE, format_string('Correct scale setting %value found for %field_type', array('%value' => $field['settings']['scale'], '%field_type' => $field['type'])));
+        break;
+    }
+  }
+
+  /**
+   * Helper method. Sets range field instance settings via field UI.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _testRangeFieldInstanceSettingsUI($field_type) {
+    switch ($field_type) {
+      case 'range_integer':
+      case 'range_float':
+      case 'range_decimal':
+        $edit = array(
+          'instance[settings][min]' => static::INSTANCE_SETTINGS_MIN,
+          'instance[settings][max]' => static::INSTANCE_SETTINGS_MAX,
+          'instance[settings][field][prefix]' => static::INSTANCE_SETTINGS_FIELD_PREFIX,
+          'instance[settings][field][suffix]' => static::INSTANCE_SETTINGS_FIELD_SUFFIX,
+          'instance[settings][from][label]' => static::INSTANCE_SETTINGS_FROM_LABEL,
+          'instance[settings][from][prefix]' => static::INSTANCE_SETTINGS_FROM_PREFIX,
+          'instance[settings][from][suffix]' => static::INSTANCE_SETTINGS_FROM_SUFFIX,
+          'instance[settings][to][label]' => static::INSTANCE_SETTINGS_TO_LABEL,
+          'instance[settings][to][prefix]' => static::INSTANCE_SETTINGS_TO_PREFIX,
+          'instance[settings][to][suffix]' => static::INSTANCE_SETTINGS_TO_SUFFIX,
+        );
+        break;
+      default:
+        $edit = array();
+    }
+
+    $this->drupalPost(NULL, $edit, t('Save settings'));
+    field_cache_clear();
+  }
+
+  /**
+   * Helper method. Verifies that range field instance has correct settings.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _verifyRangeFieldInstanceSettings($field_type) {
+    $field = field_info_field("field_$field_type");
+    $instance = field_info_instance('node', "field_$field_type", $this->contentType->type);
+
+    $this->assertEqual($instance['settings']['min'], static::INSTANCE_SETTINGS_MIN, format_string('Correct minimum setting %value found for %field_type', array('%value' => $instance['settings']['min'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['max'], static::INSTANCE_SETTINGS_MAX, format_string('Correct maximum setting %value found for %field_type', array('%value' => $instance['settings']['max'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['field']['prefix'], static::INSTANCE_SETTINGS_FIELD_PREFIX, format_string('Correct FIELD prefix setting %value found for %field_type', array('%value' => $instance['settings']['field']['prefix'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['field']['suffix'], static::INSTANCE_SETTINGS_FIELD_SUFFIX, format_string('Correct FIELD suffix setting %value found for %field_type', array('%value' => $instance['settings']['field']['suffix'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['from']['label'], static::INSTANCE_SETTINGS_FROM_LABEL, format_string('Correct FROM label setting %value found for %field_type', array('%value' => $instance['settings']['from']['label'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['from']['prefix'], static::INSTANCE_SETTINGS_FROM_PREFIX, format_string('Correct FROM prefix setting %value found for %field_type', array('%value' => $instance['settings']['from']['prefix'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['from']['suffix'], static::INSTANCE_SETTINGS_FROM_SUFFIX, format_string('Correct FROM suffix setting %value found for %field_type', array('%value' => $instance['settings']['from']['suffix'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['to']['label'], static::INSTANCE_SETTINGS_TO_LABEL, format_string('Correct TO label setting %value found for %field_type', array('%value' => $instance['settings']['to']['label'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['to']['prefix'], static::INSTANCE_SETTINGS_TO_PREFIX, format_string('Correct TO prefix setting %value found for %field_type', array('%value' => $instance['settings']['to']['prefix'], '%field_type' => $field['type'])));
+    $this->assertEqual($instance['settings']['to']['suffix'], static::INSTANCE_SETTINGS_TO_SUFFIX, format_string('Correct TO suffix setting %value found for %field_type', array('%value' => $instance['settings']['to']['suffix'], '%field_type' => $field['type'])));
+  }
+
+  /**
+   * Helper method. Tests given range field type via field UI.
+   *
+   * @param string $field_type
+   *   Range field type. Could be one of the following values:
+   *     - range_integer
+   *     - range_float
+   *     - range_decimal
+   */
+  protected function _testRangeFieldUI($field_type) {
+    $this->_testRangeFieldCreationUI($field_type);
+    $this->_testRangeFieldSettingsUI($field_type);
+    $this->_verifyRangeFieldSettings($field_type);
+    $this->_testRangeFieldInstanceSettingsUI($field_type);
+    $this->_verifyRangeFieldInstanceSettings($field_type);
+  }
+
+  /**
+   * Tests adding range fields and their settings via field UI.
+   */
+  public function testRangeFieldsUI() {
+    foreach (array('range_integer', 'range_float', 'range_decimal') as $field_type) {
+      $this->_testRangeFieldUI($field_type);
+    }
+  }
+
+}
