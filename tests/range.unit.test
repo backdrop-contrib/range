@@ -22,6 +22,14 @@ class RangeUnitTestCase extends DrupalUnitTestCase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    drupal_load('module', 'range');
+    parent::setUp();
+  }
+
+  /**
    * Tests range number formatter.
    */
   public function testRangeNumberFormat() {
