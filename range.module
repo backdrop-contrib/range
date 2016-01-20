@@ -26,6 +26,10 @@ function range_field_info() {
       'prefix' => '',
       'suffix' => '',
     ),
+    'combined' => array(
+      'prefix' => '',
+      'suffix' => '',
+    ),
   );
   return array(
     'range_integer' => array(
@@ -124,21 +128,11 @@ function range_field_instance_settings_form($field, $instance) {
     '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
     '#element_validate' => array('element_validate_number'),
   );
-  $form['field']['prefix'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Field prefix'),
-    '#default_value' => $settings['field']['prefix'],
-    '#description' => t("Define a string that should be prefixed to the field value, like '$ ' or '&euro; '. Leave blank for none."),
-  );
-  $form['field']['suffix'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Field suffix'),
-    '#default_value' => $settings['field']['suffix'],
-    '#description' => t("Define a string that should be suffixed to the field value, like ' m', ' kb/s'. Leave blank for none."),
-  );
 
   _range_field_instance_subelements_settings_form($form, 'from', $settings);
   _range_field_instance_subelements_settings_form($form, 'to', $settings);
+  _range_field_instance_subelements_settings_form($form, 'field', $settings);
+  _range_field_instance_subelements_settings_form($form, 'combined', $settings);
 
   return $form;
 }
@@ -156,14 +150,18 @@ function range_field_instance_settings_form($field, $instance) {
 function _range_field_instance_subelements_settings_form(array &$form, $name, array $settings) {
   $form[$name] = array(
     '#type' => 'fieldset',
-    '#title' => $settings[$name]['label'],
+    '#title' => drupal_ucfirst($name) . ' value',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
-  $form[$name]['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Form element label'),
-    '#default_value' => $settings[$name]['label'],
-    '#description' => t('Defines label for form element.'),
-  );
+  if ($name === 'from' || $name === 'to') {
+    $form[$name]['label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Form element label'),
+      '#default_value' => $settings[$name]['label'],
+      '#description' => t('Defines label for form element.'),
+    );
+  }
   $form[$name]['prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('Prefix'),
@@ -258,6 +256,7 @@ function range_field_formatter_info() {
     'from_prefix_suffix' => TRUE,
     'to_prefix_suffix' => TRUE,
     'field_prefix_suffix' => TRUE,
+    'combined_prefix_suffix' => FALSE,
   );
 
   $base_number_format_settings = array(
@@ -351,7 +350,7 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#default_value' => $settings['format_string'],
     );
   }
-  _range_field_formatter_base_settings_form($element, $settings);
+  _range_field_formatter_base_settings_form($element, $settings, $field['field_name']);
 
   return $element;
 }
@@ -364,7 +363,7 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
  * @param array $settings
  *   Field formatter settings.
  */
-function _range_field_formatter_base_settings_form(array &$element, array $settings) {
+function _range_field_formatter_base_settings_form(array &$element, array $settings, $field_name) {
   $element['range_separator'] = array(
     '#type' => 'textfield',
     '#title' => t('Range separator'),
@@ -390,6 +389,16 @@ function _range_field_formatter_base_settings_form(array &$element, array $setti
     '#type' => 'checkbox',
     '#title' => t('Display <em>FIELD value</em> prefix and suffix'),
     '#default_value' => $settings['field_prefix_suffix'],
+  );
+  $element['combined_prefix_suffix'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display <em>COMBINED value</em> prefix and suffix'),
+    '#default_value' => $settings['combined_prefix_suffix'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fields[' . $field_name . '][settings_edit_form][settings][range_combine]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 }
 
@@ -429,6 +438,9 @@ function _range_field_formatter_base_settings_summary(array &$summary, array $se
   }
   if ($settings['field_prefix_suffix']) {
     $summary[] = t('Display with <em>FIELD value</em> prefix and suffix.');
+  }
+  if ($settings['range_combine'] && $settings['combined_prefix_suffix']) {
+    $summary[] = t('Display with <em>COMBINED value</em> prefix and suffix.');
   }
 }
 
@@ -497,10 +509,12 @@ function _range_number_format($number, $display_type, array $settings) {
  *
  * FROM and TO might have different prefixes/suffixes.
  * Code below decides which one to use, based on the following:
- *   1. If both are disabled - show naked value
- *   2. If either FROM or TO are enabled - show prefix/suffix of the
- *      enabled one
- *   3. If both are enabled, show prefix from FROM and suffix from TO
+ *   - If COMBINED is enabled - show it
+ *   - If COMBINED is disabled and both FROM/TO are disabled - show naked value
+ *   - If COMBINED is disabled and either FROM or TO are enabled - show
+ *     prefix/suffix of the enabled one
+ *   - If COMBINED is disabled and both FROM/TO are enabled, show prefix from
+ *     FROM and suffix from TO
  *
  * @param string $value
  *   Field value.
@@ -515,24 +529,27 @@ function _range_number_format($number, $display_type, array $settings) {
 function _range_field_formatter_view_combined_value($value, array $settings, array $instance_settings) {
   $from_prefix_suffix = !empty($settings['from_prefix_suffix']);
   $to_prefix_suffix = !empty($settings['to_prefix_suffix']);
+  $combined_prefix_suffix = !empty($settings['combined_prefix_suffix']);
 
-  // Option #1: both are disabled.
-  if (empty($from_prefix_suffix) && empty($to_prefix_suffix)) {
+  // Option #0: COMBINED is enabled.
+  if ($combined_prefix_suffix) {
+    return _range_field_formatter_view_prefix_suffix($value, TRUE, $instance_settings['combined']);
+  }
+  // Option #1: COMBINED is disabled and both FROM/TO are disabled as well.
+  elseif (empty($from_prefix_suffix) && empty($to_prefix_suffix)) {
     return $value;
   }
-  // Option #2a: FROM is enabled.
+  // Option #2a: COMBINED is disabled and FROM is enabled.
   elseif (!empty($from_prefix_suffix) && empty($to_prefix_suffix)) {
     return _range_field_formatter_view_prefix_suffix($value, TRUE, $instance_settings['from']);
   }
-  // Option #2b: TO is enabled.
+  // Option #2b: COMBINED is disabled and TO is enabled.
   elseif (empty($from_prefix_suffix) && !empty($to_prefix_suffix)) {
     return _range_field_formatter_view_prefix_suffix($value, TRUE, $instance_settings['to']);
   }
-  // Option #3: both are enabled.
+  // Option #3:COMBINED is disabled and both FROM/TO are enabled.
   else {
-    $prefix = isset($instance_settings['from']['prefix']) ? field_filter_xss($instance_settings['from']['prefix']) : '';
-    $suffix = isset($instance_settings['to']['suffix']) ? field_filter_xss($instance_settings['to']['suffix']) : '';
-    return $prefix . $value . $suffix;
+    return _range_field_formatter_view_prefix_suffix($value, TRUE, array('prefix' => $instance_settings['from']['prefix'], 'suffix' => $instance_settings['to']['suffix']));
   }
 }
 

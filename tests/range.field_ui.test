@@ -28,6 +28,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
 
   const FORMATTER_SETTING_FIELD_PREFIX_SUFFIX = FALSE;
 
+  const FORMATTER_SETTING_COMBINED_PREFIX_SUFFIX = TRUE;
+
   /**
    * Meta information about tests.
    */
@@ -143,6 +145,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
           'instance[settings][to][label]' => static::INSTANCE_SETTINGS_TO_LABEL,
           'instance[settings][to][prefix]' => static::INSTANCE_SETTINGS_TO_PREFIX,
           'instance[settings][to][suffix]' => static::INSTANCE_SETTINGS_TO_SUFFIX,
+          'instance[settings][combined][prefix]' => static::INSTANCE_SETTINGS_COMBINED_PREFIX,
+          'instance[settings][combined][suffix]' => static::INSTANCE_SETTINGS_COMBINED_SUFFIX,
         );
         break;
 
@@ -170,6 +174,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
     $this->assertEqual($settings['to']['label'], static::INSTANCE_SETTINGS_TO_LABEL, format_string('Correct TO label setting %value found for the %field_type field type', array('%value' => $settings['to']['label'], '%field_type' => $field['type'])));
     $this->assertEqual($settings['to']['prefix'], static::INSTANCE_SETTINGS_TO_PREFIX, format_string('Correct TO prefix setting %value found for the %field_type field type', array('%value' => $settings['to']['prefix'], '%field_type' => $field['type'])));
     $this->assertEqual($settings['to']['suffix'], static::INSTANCE_SETTINGS_TO_SUFFIX, format_string('Correct TO suffix setting %value found for the %field_type field type', array('%value' => $settings['to']['suffix'], '%field_type' => $field['type'])));
+    $this->assertEqual($settings['combined']['prefix'], static::INSTANCE_SETTINGS_COMBINED_PREFIX, format_string('Correct COMBINED prefix setting %value found for the %field_type field type', array('%value' => $settings['combined']['prefix'], '%field_type' => $field['type'])));
+    $this->assertEqual($settings['combined']['suffix'], static::INSTANCE_SETTINGS_COMBINED_SUFFIX, format_string('Correct COMBINED suffix setting %value found for the %field_type field type', array('%value' => $settings['combined']['suffix'], '%field_type' => $field['type'])));
   }
 
   /**
@@ -233,6 +239,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
         "fields[$field_name][settings_edit_form][settings][from_prefix_suffix]" => static::FORMATTER_SETTING_FROM_PREFIX_SUFFIX,
         "fields[$field_name][settings_edit_form][settings][to_prefix_suffix]" => static::FORMATTER_SETTING_TO_PREFIX_SUFFIX,
         "fields[$field_name][settings_edit_form][settings][field_prefix_suffix]" => static::FORMATTER_SETTING_FIELD_PREFIX_SUFFIX,
+        "fields[$field_name][settings_edit_form][settings][combined_prefix_suffix]" => static::FORMATTER_SETTING_COMBINED_PREFIX_SUFFIX,
       );
       $this->drupalPostAJAX(NULL, $edit, array("field_{$field_type}_formatter_settings_update" => t('Update')));
       // Save field settings via field UI.
@@ -266,6 +273,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
       $this->assertEqual($settings['from_prefix_suffix'], static::FORMATTER_SETTING_FROM_PREFIX_SUFFIX, format_string('Correct display FROM prefix/suffix setting %value found for the %formatter_type formater (%field_type field type)', array('%value' => $settings['from_prefix_suffix'], '%formatter_type' => $formatter, '%field_type' => $field['type'])));
       $this->assertEqual($settings['to_prefix_suffix'], static::FORMATTER_SETTING_TO_PREFIX_SUFFIX, format_string('Correct display TO prefix/suffix setting %value found for the %formatter_type formater (%field_type field type)', array('%value' => $settings['to_prefix_suffix'], '%formatter_type' => $formatter, '%field_type' => $field['type'])));
       $this->assertEqual($settings['field_prefix_suffix'], static::FORMATTER_SETTING_FIELD_PREFIX_SUFFIX, format_string('Correct display FIELD prefix/suffix setting %value found for the %formatter_type formater (%field_type field type)', array('%value' => $settings['field_prefix_suffix'], '%formatter_type' => $formatter, '%field_type' => $field['type'])));
+      $this->assertEqual($settings['combined_prefix_suffix'], static::FORMATTER_SETTING_COMBINED_PREFIX_SUFFIX, format_string('Correct display COMBINED prefix/suffix setting %value found for the %formatter_type formater (%field_type field type)', array('%value' => $settings['combined_prefix_suffix'], '%formatter_type' => $formatter, '%field_type' => $field['type'])));
     }
   }
 
