@@ -629,7 +629,7 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   }
 
   $element += array(
-    // Extract the number type from the field type name for easier validation.
+    // Extract the range type from the field type name for easier validation.
     '#range_type' => str_replace('range_', '', $field['type']),
   );
 
