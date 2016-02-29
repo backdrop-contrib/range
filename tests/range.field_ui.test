@@ -44,8 +44,13 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
-    parent::setUp(array('field_ui'));
+  protected function setUp(array $modules = array()) {
+    $modules[] = 'field_ui';
+    parent::setUp($modules);
+
+    $account = $this->drupalCreateUser(array('administer content types', 'administer nodes'));
+    $this->drupalLogin($account);
+    $this->createTestContentType();
   }
 
   /**
@@ -55,11 +60,11 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    *   Range field type. Could be one of the following values: range_integer,
    *   range_float or range_decimal.
    */
-  protected function _testRangeFieldCreationUI($field_type) {
-    $this->drupalGet("admin/structure/types/manage/{$this->contentType->type}/fields");
+  protected function _testRangeFieldCreationUI($field_type = 'range_integer') {
+    $this->drupalGet("admin/structure/types/manage/{$this->contentType}/fields");
     $edit = array(
       'fields[_add_new_field][label]' => $this->randomName(),
-      'fields[_add_new_field][field_name]' => $field_type,
+      'fields[_add_new_field][field_name]' => $this->getTestFieldNameRaw($field_type),
       'fields[_add_new_field][type]' => $field_type,
       'fields[_add_new_field][widget_type]' => 'range',
     );
@@ -73,8 +78,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    *   Range field type. Could be one of the following values: range_integer,
    *   range_float or range_decimal.
    */
-  protected function _testRangeFieldSettingsUI($field_type) {
-    $field_name = "field_$field_type";
+  protected function _testRangeFieldSettingsUI($field_type = 'range_integer') {
+    $field_name = $this->getTestFieldName($field_type);
 
     switch ($field_type) {
       case 'range_integer':
@@ -127,8 +132,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    *   Range field type. Could be one of the following values: range_integer,
    *   range_float or range_decimal.
    */
-  protected function _testRangeFieldInstanceSettingsUI($field_type) {
-    $field_name = "field_$field_type";
+  protected function _testRangeFieldInstanceSettingsUI($field_type = 'range_integer') {
+    $field_name = $this->getTestFieldName($field_type);
 
     switch ($field_type) {
       case 'range_integer':
@@ -161,7 +166,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
 
     // Ensure that all field instance settings were saved correctly.
     $field = field_info_field($field_name);
-    $instance = field_info_instance('node', $field_name, $this->contentType->type);
+    $instance = field_info_instance('node', $field_name, $this->contentType);
     $settings = $instance['settings'];
 
     $this->assertEqual($settings['min'], static::INSTANCE_SETTINGS_MIN, format_string('Correct minimum setting %value found for the %field_type field type', array('%value' => $settings['min'], '%field_type' => $field['type'])));
@@ -185,8 +190,8 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    *   Range field type. Could be one of the following values: range_integer,
    *   range_float or range_decimal.
    */
-  protected function _testRangeFieldFormatterSettingsUI($field_type) {
-    $field_name = "field_$field_type";
+  protected function _testRangeFieldFormatterSettingsUI($field_type = 'range_integer') {
+    $field_name = $this->getTestFieldName($field_type);
 
     switch ($field_type) {
       case 'range_integer':
@@ -203,7 +208,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
     }
     $formatters[] = 'range_unformatted';
 
-    $this->drupalGet("admin/structure/types/manage/{$this->contentType->type}/display");
+    $this->drupalGet("admin/structure/types/manage/{$this->contentType}/display");
     foreach ($formatters as $formatter) {
       $edit = array(
         "fields[$field_name][type]" => $formatter,
@@ -241,7 +246,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
         "fields[$field_name][settings_edit_form][settings][field_prefix_suffix]" => static::FORMATTER_SETTING_FIELD_PREFIX_SUFFIX,
         "fields[$field_name][settings_edit_form][settings][combined_prefix_suffix]" => static::FORMATTER_SETTING_COMBINED_PREFIX_SUFFIX,
       );
-      $this->drupalPostAJAX(NULL, $edit, array("field_{$field_type}_formatter_settings_update" => t('Update')));
+      $this->drupalPostAJAX(NULL, $edit, array($this->getTestFieldName($field_type) . '_formatter_settings_update' => t('Update')));
       // Save field settings via field UI.
       $this->drupalPost(NULL, array(), t('Save'));
       // Clear field info cache.
@@ -249,7 +254,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
 
       // Ensure that all field formatter settings were saved correctly.
       $field = field_info_field($field_name);
-      $instance = field_info_instance('node', $field_name, $this->contentType->type);
+      $instance = field_info_instance('node', $field_name, $this->contentType);
       $settings = $instance['display']['default']['settings'];
 
       switch ($formatter) {
