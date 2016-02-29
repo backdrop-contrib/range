@@ -4,6 +4,8 @@ package = Fields
 core = 7.x
 dependencies[] = field
 
+test_dependencies[] = i18n_field
+
 ; Tests
 files[] = tests/range.unit.test
 files[] = tests/range.base.test
