@@ -64,6 +64,7 @@ class RangeInternationalizationWebTestCase extends RangeBaseWebTestCase {
    */
   protected function addSecondaryLanguage() {
     include_once DRUPAL_ROOT . '/includes/language.inc';
+    include_once DRUPAL_ROOT . '/includes/locale.inc';
     // Add secondary language.
     locale_add_language(static::SECONDARY_LANGUAGE);
     // Configure language negotiation.
