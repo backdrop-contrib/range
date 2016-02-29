@@ -5,6 +5,9 @@
  * Defines range field types.
  */
 
+// Include i18n.
+require_once 'range.i18n.inc';
+
 /**
  * Implements hook_field_info().
  */
@@ -188,6 +191,8 @@ function _range_field_instance_subelements_settings_form(array &$form, $name, ar
  * - 'range_from_greater_than_to': FROM value is greater than TO value.
  */
 function range_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  $instance = range_translate_field_instance($instance);
+
   foreach ($items as $delta => $item) {
     if ($item['from'] !== '' && $item['to'] === '' || $item['from'] === '' && $item['to'] !== '') {
       $errors[$field['field_name']][$langcode][$delta][] = array(
@@ -450,6 +455,7 @@ function _range_field_formatter_base_settings_summary(array &$summary, array $se
 function range_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   $settings = $display['settings'];
+  $instance = range_translate_field_instance($instance);
 
   foreach ($items as $delta => $item) {
     $from_value = _range_number_format($item['from'], $display['type'], $settings);
@@ -614,6 +620,7 @@ function range_field_widget_info() {
  * Implements hook_field_widget_form().
  */
 function range_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $instance = range_translate_field_instance($instance);
   $settings = $instance['settings'];
   $from = isset($items[$delta]['from']) ? $items[$delta]['from'] : '';
   $to = isset($items[$delta]['to']) ? $items[$delta]['to'] : '';
@@ -718,7 +725,7 @@ function range_field_widget_validate_subelement($subelement, $element, &$form_st
       case 'float':
       case 'decimal':
         $message_args = array(
-          '%field' => $instance['label'],
+          '%field' => $element['#title'],
           '@separator' => $field['settings']['decimal_separator'],
         );
         $regexp = '@([^-0-9\\' . $field['settings']['decimal_separator'] . '])|(.-)@';
@@ -727,7 +734,7 @@ function range_field_widget_validate_subelement($subelement, $element, &$form_st
 
       case 'integer':
         $message_args = array(
-          '%field' => $instance['label'],
+          '%field' => $element['#title'],
         );
         $regexp = '@([^-0-9])|(.-)@';
         $message = t('Only numbers are allowed in %field.', $message_args);

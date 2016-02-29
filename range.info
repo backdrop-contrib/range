@@ -8,6 +8,7 @@ dependencies[] = field
 files[] = tests/range.unit.test
 files[] = tests/range.base.test
 files[] = tests/range.field_ui.test
+files[] = tests/range.i18n.test
 
 ; Views handlers
 files[] = views/range_handler_filter_numeric_range.inc
