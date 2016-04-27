@@ -228,14 +228,14 @@ function range_field_validate($entity_type, $entity, $field, $instance, $langcod
  */
 function range_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if ($field['type'] === 'range_decimal') {
-    // Let PHP format the value to ensure consistent behavior across storage
+    // Let PHP round the value to ensure consistent behavior across storage
     // backends.
     foreach ($items as $delta => $item) {
       if (isset($item['from'])) {
-        $items[$delta]['from'] = number_format($item['from'], $field['settings']['scale'], '', '');
+        $items[$delta]['from'] = round($item['from'], $field['settings']['scale']);
       }
       if (isset($item['to'])) {
-        $items[$delta]['to'] = number_format($item['to'], $field['settings']['scale'], '', '');
+        $items[$delta]['to'] = round($item['to'], $field['settings']['scale']);
       }
     }
   }
