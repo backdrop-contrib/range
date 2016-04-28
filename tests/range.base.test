@@ -136,6 +136,11 @@ class RangeBaseWebTestCase extends DrupalWebTestCase {
       'cardinality' => 1,
       'settings' => array(),
     );
+    if ($field_type === 'range_float' || $field_type === 'range_decimal') {
+      $field['settings']['decimal_separator'] = static::FIELD_SETTINGS_DECIMAL_SEPARATOR;
+      $field['settings']['precision'] = static::FIELD_SETTINGS_PRECISION;
+      $field['settings']['scale'] = static::FIELD_SETTINGS_SCALE;
+    }
     $this->field = field_create_field($field);
 
     $instance = array(
@@ -147,6 +152,8 @@ class RangeBaseWebTestCase extends DrupalWebTestCase {
         'type' => 'range',
       ),
       'settings' => array(
+        'min' => static::INSTANCE_SETTINGS_MIN,
+        'max' => static::INSTANCE_SETTINGS_MAX,
         'from' => array(
           'label' => static::INSTANCE_SETTINGS_FROM_LABEL,
           'prefix' => static::INSTANCE_SETTINGS_FROM_PREFIX,
