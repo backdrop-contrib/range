@@ -8,15 +8,15 @@
 /**
  * Tests form validation for range fields.
  */
-class RangeFormValidationTestCase extends RangeBaseWebTestCase {
+class RangeFieldWidgetValidationTestCase extends RangeBaseWebTestCase {
 
   /**
    * Meta information about tests.
    */
   public static function getInfo() {
     return array(
-      'name' => 'Range form validation tests',
-      'description' => 'Tests form validation for range fields.',
+      'name' => 'Field widget validation',
+      'description' => 'Tests range field widget validation.',
       'group' => 'Range',
     );
   }
@@ -40,7 +40,7 @@ class RangeFormValidationTestCase extends RangeBaseWebTestCase {
 
     $this->drupalGet("node/add/$this->contentType");
     $field_name = $this->getTestFieldName('range_integer');
-    $form_element_key = $field_name. '[' . LANGUAGE_NONE . '][0]';
+    $form_element_key = $field_name . '[' . LANGUAGE_NONE . '][0]';
 
     // Test field validation error messages.
     //
@@ -88,12 +88,12 @@ class RangeFormValidationTestCase extends RangeBaseWebTestCase {
   /**
    * Tests field widget validation for range integer fields.
    */
-  public function testRangeIntegerFormValidation() {
+  protected function testRangeIntegerFormValidation() {
     $this->createTestRangeField('range_integer');
 
     $this->drupalGet("node/add/$this->contentType");
     $field_name = $this->getTestFieldName('range_integer');
-    $form_element_key = $field_name. '[' . LANGUAGE_NONE . '][0]';
+    $form_element_key = $field_name . '[' . LANGUAGE_NONE . '][0]';
 
     // Test field widget validation error messages.
     //
@@ -126,12 +126,12 @@ class RangeFormValidationTestCase extends RangeBaseWebTestCase {
    *   Field type to test against. Could be one of the following values:
    *   range_float or range_decimal.
    */
-  public function _testRangeFloatFormValidation($field_type) {
+  protected function _testRangeFloatFormValidation($field_type) {
     $this->createTestRangeField($field_type);
 
     $this->drupalGet("node/add/$this->contentType");
     $field_name = $this->getTestFieldName($field_type);
-    $form_element_key = $field_name. '[' . LANGUAGE_NONE . '][0]';
+    $form_element_key = $field_name . '[' . LANGUAGE_NONE . '][0]';
 
     // Test field widget validation error messages.
     //
@@ -186,4 +186,5 @@ class RangeFormValidationTestCase extends RangeBaseWebTestCase {
   public function testRangeDecimalFormValidation() {
     $this->_testRangeFloatFormValidation('range_decimal');
   }
+
 }

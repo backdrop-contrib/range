@@ -10,7 +10,8 @@ test_dependencies[] = i18n_field
 files[] = tests/range.unit.test
 files[] = tests/range.base.test
 files[] = tests/range.field_ui.test
-files[] = tests/range.form_validation.test
+files[] = tests/range.field_widget.test
+files[] = tests/range.field_widget_validation.test
 files[] = tests/range.i18n.test
 
 ; Views handlers

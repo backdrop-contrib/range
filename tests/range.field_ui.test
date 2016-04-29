@@ -35,7 +35,7 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => 'Range field UI tests',
+      'name' => 'Field UI',
       'description' => 'Tests adding range fields and their settings via field UI.',
       'group' => 'Range',
     );
