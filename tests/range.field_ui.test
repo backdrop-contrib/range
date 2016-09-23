@@ -48,9 +48,9 @@ class RangeFieldUIWebTestCase extends RangeBaseWebTestCase {
     $modules[] = 'field_ui';
     parent::setUp($modules);
 
-    $account = $this->drupalCreateUser(array('administer content types', 'administer nodes'));
-    $this->drupalLogin($account);
     $this->createTestContentType();
+    $account = $this->drupalCreateUser(array('administer content types', 'administer nodes', 'administer fields', "create $this->contentType content"));
+    $this->drupalLogin($account);
   }
 
   /**
