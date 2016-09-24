@@ -5,6 +5,7 @@ core = 7.x
 dependencies[] = field
 
 test_dependencies[] = i18n_field
+test_dependencies[] = views
 
 ; Tests
 files[] = tests/range.unit.test
