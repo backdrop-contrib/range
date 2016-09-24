@@ -14,6 +14,9 @@ files[] = tests/range.field_ui.test
 files[] = tests/range.field_widget.test
 files[] = tests/range.field_widget_validation.test
 files[] = tests/range.i18n.test
+files[] = tests/views/range.views.base.test
+files[] = tests/views/range.views.filter.test
+files[] = tests/views/range.views.argument.test
 
 ; Views handlers
 files[] = views/range_handler_filter_numeric_range.inc
