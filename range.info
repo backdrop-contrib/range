@@ -5,6 +5,9 @@ core = 7.x
 dependencies[] = field
 
 test_dependencies[] = i18n_field
+test_dependencies[] = search_api
+test_dependencies[] = search_api_db
+test_dependencies[] = search_api_views
 test_dependencies[] = views
 
 ; Tests
