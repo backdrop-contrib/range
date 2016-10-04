@@ -22,34 +22,26 @@ class RangeViewsFilterTestCase extends RangeViewsBaseTestCase {
   }
 
   /**
-   * {@inheritdoc}
+   * Tests range field views filter.
    */
-  protected function setUp(array $modules = array()) {
-    parent::setUp($modules);
-
-    // Add some basic test nodes.
-    $ranges = array(
-      array('from' => 0, 'to' => 10),
-      array('from' => 5, 'to' => 9),
-      array('from' => -5, 'to' => 15),
-      array('from' => -10, 'to' => 5),
-    );
-    foreach ($ranges as $range) {
-      $this->nodes[] = $this->drupalCreateNode(array(
-        'type' => $this->contentType,
-        $this->fieldName => array(
-          LANGUAGE_NONE => array($range),
-        ),
-      ));
-    }
+  public function testRangeFieldViewsFilter() {
+    $view = $this->getRangeFieldViewsFilterTestView();
+    $this->_testRangeViewsFilter($view);
   }
 
   /**
-   * Tests range views filter.
+   * Tests range search API views filter.
    */
-  public function testRangeViewsFilter() {
-    $view = $this->getTestRangeFilterView();
+  public function testRangeSearchApiViewsFilter() {
+    $this->createSearchServerAndIndex();
+    $view = $this->getRangeSearchApiViewsFilterTestView();
+    $this->_testRangeViewsFilter($view);
+  }
 
+  /**
+   * Range views filter test runner.
+   */
+  protected function _testRangeViewsFilter($view) {
     // Range contains, exclude endpoints.
     $view->set_display('default');
     $view->init_handlers();
@@ -75,7 +67,6 @@ class RangeViewsFilterTestCase extends RangeViewsBaseTestCase {
       array('nid' => $this->nodes[0]->nid),
       array('nid' => $this->nodes[1]->nid),
       array('nid' => $this->nodes[2]->nid),
-      array('nid' => $this->nodes[3]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map, 'Range views filter (contains, include endpoints) produces correct results');
     $view->destroy();
@@ -98,7 +89,7 @@ class RangeViewsFilterTestCase extends RangeViewsBaseTestCase {
     $view->set_display('default');
     $view->init_handlers();
     $view->filter[$this->fieldName]->operator = 'not within';
-    $view->filter[$this->fieldName]->value = 9;
+    $view->filter[$this->fieldName]->value = 5;
     $view->filter[$this->fieldName]->options['include_endpoints'] = TRUE;
     $this->executeView($view);
     $expected_result = array(
@@ -109,12 +100,12 @@ class RangeViewsFilterTestCase extends RangeViewsBaseTestCase {
   }
 
   /**
-   * Returns test view.
+   * Returns view for testing range field views filter.
    *
-   * @return \view
+   * @return view
    *   View object.
    */
-  protected function getTestRangeFilterView() {
+  protected function getRangeFieldViewsFilterTestView() {
     $view = new view();
     $view->name = 'test_range_filter';
     $view->description = '';
@@ -145,6 +136,52 @@ class RangeViewsFilterTestCase extends RangeViewsBaseTestCase {
     /* Filter criterion: Indexed Node: Range integer range filter */
     $handler->display->display_options['filters']['field_range_integer']['id'] = 'field_range_integer';
     $handler->display->display_options['filters']['field_range_integer']['table'] = 'field_data_field_range_integer';
+    $handler->display->display_options['filters']['field_range_integer']['field'] = 'field_range_integer';
+
+    return $view;
+  }
+
+  /**
+   * Returns view for testing range search API views filter.
+   *
+   * @return view
+   *   View object.
+   */
+  protected function getRangeSearchApiViewsFilterTestView() {
+    $view = new view();
+    $view->name = 'test_range_search_api_filter';
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'search_api_index_test_index';
+    $view->human_name = 'test_range_search_api_filter';
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'none';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Indexed Node: Node ID */
+    $handler->display->display_options['fields']['nid']['id'] = 'nid';
+    $handler->display->display_options['fields']['nid']['table'] = 'search_api_index_test_index';
+    $handler->display->display_options['fields']['nid']['field'] = 'nid';
+    $handler->display->display_options['fields']['nid']['label'] = '';
+    $handler->display->display_options['fields']['nid']['element_label_colon'] = FALSE;
+    $handler->display->display_options['fields']['nid']['link_to_entity'] = 0;
+    /* Sort criterion: Indexed Node: Entity ID */
+    $handler->display->display_options['sorts']['search_api_id']['id'] = 'search_api_id';
+    $handler->display->display_options['sorts']['search_api_id']['table'] = 'search_api_index_test_index';
+    $handler->display->display_options['sorts']['search_api_id']['field'] = 'search_api_id';
+    /* Filter criterion: Indexed Node: Range integer range filter */
+    $handler->display->display_options['filters']['field_range_integer']['id'] = 'field_range_integer';
+    $handler->display->display_options['filters']['field_range_integer']['table'] = 'search_api_index_test_index';
     $handler->display->display_options['filters']['field_range_integer']['field'] = 'field_range_integer';
 
     return $view;
