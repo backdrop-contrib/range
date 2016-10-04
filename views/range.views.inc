@@ -6,40 +6,30 @@
  */
 
 /**
- * Implements hook_views_data().
+ * Implements hook_field_views_data().
  */
-function range_views_data() {
-  $data = array();
+function range_field_views_data($field) {
+  $data = field_views_field_default_views_data($field);
 
-  _range_views_field_data($data);
-
-  if (module_exists('search_api_views')) {
-    _range_views_search_api_data($data);
+  if (!empty($data)) {
+    _range_views_data_filter_handler($data, $field);
+    _range_views_data_argument_handler($data, $field);
   }
 
   return $data;
 }
 
 /**
- * Helper function.
- *
- * Collects views field data for range fields.
- *
- * @param array $data
- *   Views data array.
+ * Implements hook_views_data().
  */
-function _range_views_field_data(array &$data) {
-  foreach (field_info_fields() as $field) {
-    if ($field['storage']['type'] != 'field_sql_storage') {
-      continue;
-    }
-    if ($field['module'] != 'range') {
-      continue;
-    }
+function range_views_data() {
+  $data = array();
 
-    _range_views_data_filter_handler($data, $field);
-    _range_views_data_argument_handler($data, $field);
+  if (module_exists('search_api_views')) {
+    _range_views_search_api_data($data);
   }
+
+  return $data;
 }
 
 /**
