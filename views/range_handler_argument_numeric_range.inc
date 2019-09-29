@@ -17,7 +17,10 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     $options = parent::option_definition();
 
     $options['operator'] = array('default' => 'within');
-    $options['include_endpoints'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['include_endpoints'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
@@ -54,8 +57,10 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     list($field_from, $field_to) = $this->get_range_subfields();
 
     $operators = array(
-      '<', '>',
-      '<=', '>=',
+      '<',
+      '>',
+      '<=',
+      '>=',
     );
     $operator = $this->options['operator'];
 
@@ -87,7 +92,7 @@ class range_handler_argument_numeric_range extends views_handler_argument {
     $this->ensure_my_table();
     return array(
       $this->table_alias . '.' . $this->definition['additional fields']['from'],
-      $this->table_alias . '.' . $this->definition['additional fields']['to']
+      $this->table_alias . '.' . $this->definition['additional fields']['to'],
     );
   }
 

@@ -101,8 +101,10 @@ class range_handler_filter_numeric_range extends views_handler_filter {
    */
   protected function op_within($field_from, $field_to) {
     $operators = array(
-      '<', '>',
-      '<=', '>=',
+      '<',
+      '>',
+      '<=',
+      '>=',
     );
 
     $inlude_endpoints = !($this->options['include_endpoints'] xor ($this->operator === 'within'));
@@ -133,7 +135,7 @@ class range_handler_filter_numeric_range extends views_handler_filter {
     $this->ensure_my_table();
     return array(
       $this->table_alias . '.' . $this->definition['additional fields']['from'],
-      $this->table_alias . '.' . $this->definition['additional fields']['to']
+      $this->table_alias . '.' . $this->definition['additional fields']['to'],
     );
   }
 

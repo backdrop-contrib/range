@@ -1,0 +1,60 @@
+[RangeBaseWebTestCase]
+name = RangeBaseWebTestCase
+description = RangeBaseWebTestCase
+group = range
+file = tests/range.base.test
+
+[RangeFieldWidgetBaseWebTestCase]
+name = RangeFieldWidgetBaseWebTestCase
+description = RangeFieldWidgetBaseWebTestCase
+group = range
+file = tests/range.base.test
+
+[RangeFieldUIWebTestCase]
+name = Field UI
+description = Tests adding range fields and their settings via field UI.
+group = Range
+file = tests/range.field_ui.test
+
+[RangeFieldWidgetTestCase]
+name = Field widget
+description = Tests range field widget.
+group = Range
+file = tests/range.field_widget.test
+
+[RangeFieldWidgetValidationTestCase]
+name = Field widget validation
+description = Tests range field widget validation.
+group = Range
+file = tests/range.field_widget_validation.test
+
+[RangeInternationalizationWebTestCase]
+name = Internationalization
+description = Tests translatability of range fields.
+group = Range
+file = tests/range.i18n.test
+
+[RangeUnitTestCase]
+name = Unit tests
+description = Tests range formatter layer.
+group = Range
+file = tests/range.unit.test
+
+[RangeViewsArgumentTestCase]
+name = Views argument
+description = Tests range views argument handler.
+group = Range
+file = tests/views/range.views.argument.test
+
+[RangeViewsBaseTestCase]
+name = RangeViewsBaseTestCase
+description = RangeViewsBaseTestCase
+group = range
+file = tests/views/range.views.base.test
+
+[RangeViewsFilterTestCase]
+name = Views filter
+description = Tests range views filter handler.
+group = Range
+file = tests/views/range.views.filter.test
+

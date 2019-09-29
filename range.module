@@ -5,9 +5,6 @@
  * Defines range field types.
  */
 
-// Include i18n.
-require_once 'range.i18n.inc';
-
 /**
  * Implements hook_field_info().
  */
@@ -84,7 +81,7 @@ function range_field_settings_form($field, $instance, $has_data) {
     $form['precision'] = array(
       '#type' => 'select',
       '#title' => t('Precision'),
-      '#options' => drupal_map_assoc(range(10, 32)),
+      '#options' => backdrop_map_assoc(range(10, 32)),
       '#default_value' => $settings['precision'],
       '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -92,7 +89,7 @@ function range_field_settings_form($field, $instance, $has_data) {
     $form['scale'] = array(
       '#type' => 'select',
       '#title' => t('Scale'),
-      '#options' => drupal_map_assoc(range(0, 10)),
+      '#options' => backdrop_map_assoc(range(0, 10)),
       '#default_value' => $settings['scale'],
       '#description' => t('The number of digits to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -102,7 +99,10 @@ function range_field_settings_form($field, $instance, $has_data) {
     $form['decimal_separator'] = array(
       '#type' => 'select',
       '#title' => t('Decimal marker'),
-      '#options' => array('.' => t('Decimal point'), ',' => t('Comma')),
+      '#options' => array(
+        '.' => t('Decimal point'),
+        ',' => t('Comma'),
+      ),
       '#default_value' => $settings['decimal_separator'],
       '#description' => t('The character users will input to mark the decimal point in forms.'),
     );
@@ -153,7 +153,7 @@ function range_field_instance_settings_form($field, $instance) {
 function _range_field_instance_subelements_settings_form(array &$form, $name, array $settings) {
   $form[$name] = array(
     '#type' => 'fieldset',
-    '#title' => drupal_ucfirst($name) . ' value',
+    '#title' => backdrop_ucfirst($name) . ' value',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -342,7 +342,7 @@ function range_field_formatter_settings_form($field, $instance, $view_mode, $for
     $element['scale'] = array(
       '#type' => 'select',
       '#title' => t('Scale'),
-      '#options' => drupal_map_assoc(range(0, 10)),
+      '#options' => backdrop_map_assoc(range(0, 10)),
       '#default_value' => $settings['scale'],
       '#description' => t('The number of digits to the right of the decimal.'),
     );
@@ -674,7 +674,7 @@ function range_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $element['#element_validate'][] = 'range_field_widget_validate';
 
-  $element['#attached']['css'][] = drupal_get_path('module', 'range') . '/css/range.admin.css';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'range') . '/css/range.admin.css';
 
   return $element;
 }
@@ -810,6 +810,18 @@ function range_property_field_item_range_info($field) {
 function range_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'range') . '/views',
+    'path' => backdrop_get_path('module', 'range') . '/views',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function range_autoload_info() {
+  return array(
+    'range_handler_argument_numeric_range' => 'views/range_handler_argument_numeric_range.inc',
+    'range_search_api_handler_argument_numeric_range' => 'views/range_handler_argument_numeric_range.inc',
+    'range_handler_filter_numeric_range' => 'views/range_handler_filter_numeric_range.inc',
+    'range_search_api_handler_filter_numeric_range' => 'views/range_handler_filter_numeric_range.inc',
   );
 }
