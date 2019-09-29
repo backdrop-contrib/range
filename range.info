@@ -1,10 +1,8 @@
-name = Numeric range
+name = Range
 description = Provides numeric range field.
 package = Fields
 backdrop = 1.x
 type = module
 dependencies[] = field
-
-; Tests
-; Views handlers
-; Migrate handlers
+tags[] = field
+tags[] = range
